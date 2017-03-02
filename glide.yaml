@@ -14,3 +14,4 @@ import:
   version: ^0.2.2
 - package: github.com/Masterminds/semver
   version: ^1.2.2
+- package: github.com/ghodss/yaml
