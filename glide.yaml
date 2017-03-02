@@ -1,0 +1,16 @@
+package: github.com/luizbafilho/chart-server
+import:
+- package: github.com/labstack/echo
+  version: ^3.0.3
+- package: golang.org/x/crypto
+  version: 453249f01cfeb54c3d549ddb75ff152ca243f9d8
+  subpackages:
+  - acme/autocert
+- package: k8s.io/helm
+  version: ^2.2.1
+  subpackages:
+  - pkg/chartutil
+- package: github.com/gobwas/glob
+  version: ^0.2.2
+- package: github.com/Masterminds/semver
+  version: ^1.2.2

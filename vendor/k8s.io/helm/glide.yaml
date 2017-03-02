@@ -1,0 +1,71 @@
+package: k8s.io/helm
+import:
+- package: golang.org/x/net
+  version: e90d6d0afc4c315a0d87a568ae68577cc15149a0
+  subpackages:
+  - context
+- package: github.com/spf13/cobra
+  version: f62e98d28ab7ad31d707ba837a966378465c7b57
+- package: github.com/spf13/pflag
+  version: 5ccb023bc27df288a957c5e994cd44fd19619465
+- package: github.com/Masterminds/sprig
+  version: ^2.8
+- package: github.com/ghodss/yaml
+- package: github.com/Masterminds/semver
+  version: ~1.2.2
+- package: github.com/technosophos/moniker
+- package: github.com/golang/protobuf
+  version: df1d3ca07d2d07bba352d5b73c4313b4e2a6203e
+  subpackages:
+  - proto
+  - ptypes/any
+  - ptypes/timestamp
+- package: google.golang.org/grpc
+  version: 1.0.3
+- package: k8s.io/kubernetes
+  version: ~1.5.0
+  subpackages:
+  - pkg/api
+  - pkg/api/errors
+  - pkg/api/meta
+  - pkg/api/unversioned
+  - pkg/api/v1
+  - pkg/apis/apps/v1beta1
+  - pkg/apis/batch
+  - pkg/apis/batch/v1
+  - pkg/apis/extensions
+  - pkg/apis/extensions/v1beta1
+  - pkg/client/clientset_generated/internalclientset
+  - pkg/client/clientset_generated/internalclientset/typed/core/internalversion
+  - pkg/client/clientset_generated/internalclientset/typed/extensions/internalversion
+  - pkg/client/restclient
+  - pkg/client/typed/discovery
+  - pkg/client/unversioned
+  - pkg/client/unversioned/clientcmd
+  - pkg/client/unversioned/portforward
+  - pkg/client/unversioned/remotecommand
+  - pkg/fields
+  - pkg/kubectl
+  - pkg/kubectl/cmd/util
+  - pkg/kubectl/resource
+  - pkg/labels
+  - pkg/runtime
+  - pkg/util/intstr
+  - pkg/util/strategicpatch
+  - pkg/util/wait
+  - pkg/version
+  - pkg/watch
+- package: github.com/gosuri/uitable
+- package: github.com/asaskevich/govalidator
+  version: ^4.0.0
+- package: golang.org/x/crypto
+  subpackages:
+  - openpgp
+- package: github.com/gobwas/glob
+  version: ^0.2.1
+- package: github.com/evanphx/json-patch
+testImports:
+- package: github.com/stretchr/testify
+  version: ^1.1.4
+  subpackages:
+  - assert
