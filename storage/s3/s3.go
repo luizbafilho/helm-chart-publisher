@@ -28,7 +28,6 @@ func (s *S3Store) Name() string {
 
 // Put stores the content
 func (s *S3Store) Put(path string, content []byte) error {
-
 	params := &s3.PutObjectInput{
 		Bucket:      aws.String(s.config.Bucket),
 		Key:         aws.String(path),

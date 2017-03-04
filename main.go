@@ -1,40 +1,19 @@
 package main
 
 import (
-	"bytes"
-	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
 
 	"github.com/ghodss/yaml"
-	"github.com/luizbafilho/chart-server/storage"
+	"github.com/luizbafilho/chart-server/publisher"
 	_ "github.com/luizbafilho/chart-server/storage/s3"
-
-	"k8s.io/helm/pkg/chartutil"
-	"k8s.io/helm/pkg/provenance"
-	"k8s.io/helm/pkg/repo"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )
 
-//APP app name
-const APP = "helm-charts-publisher"
-
-var chartsIndex *repo.IndexFile
-
-func init() {
-	initViper()
-}
-
 func main() {
-	chartsIndex := repo.NewIndexFile()
-
-	storageType, config := getStorageAndConfig()
-
-	store, err := storage.New(storageType, config)
-
+	publisher, err := publisher.New()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -43,7 +22,7 @@ func main() {
 	e.Use(middleware.Logger())
 	e.GET("/index.yaml", func(c echo.Context) error {
 
-		b, err := yaml.Marshal(*chartsIndex)
+		b, err := yaml.Marshal(publisher.GetIndex())
 		if err != nil {
 			return err
 		}
@@ -57,47 +36,17 @@ func main() {
 		if err != nil {
 			return err
 		}
-		files := form.File["charts"]
+		file := form.File["charts"][0]
 
-		index := repo.NewIndexFile()
-		for _, file := range files {
-			// Source
-			src, err := file.Open()
-			if err != nil {
-				return err
-			}
-			defer src.Close()
-
-			content, err := ioutil.ReadAll(src)
-			if err != nil {
-				return err
-			}
-
-			if err := store.Put(file.Filename, content); err != nil {
-				fmt.Println("UploadFile", err)
-				return err
-			}
-
-			chart, err := chartutil.LoadArchive(bytes.NewBuffer(content))
-			if err != nil {
-				fmt.Println("LoadArchive", err)
-				return err
-			}
-
-			hash, err := provenance.Digest(src)
-			if err != nil {
-				fmt.Println("Digest", err)
-				return err
-			}
-
-			fname := file.Filename
-
-			index.Add(chart.Metadata, fname, "http://charts.videos.globoi.com", hash)
+		src, err := file.Open()
+		if err != nil {
+			return err
 		}
+		defer src.Close()
 
-		chartsIndex.Merge(index)
-
-		chartsIndex.SortEntries()
+		if err := publisher.Publish(file.Filename, src); err != nil {
+			return err
+		}
 
 		return c.NoContent(http.StatusNoContent)
 	})

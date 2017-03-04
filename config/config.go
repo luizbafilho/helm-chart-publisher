@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"fmt"
@@ -6,6 +6,12 @@ import (
 
 	"github.com/spf13/viper"
 )
+
+const APP = "helm-charts-publisher"
+
+func init() {
+	initViper()
+}
 
 func initViper() {
 	viper.SetConfigName("config")        // name of config file (without extension)
@@ -19,7 +25,9 @@ func initViper() {
 	}
 }
 
-func getStorageAndConfig() (string, map[string]interface{}) {
+type Config map[string]interface{}
+
+func GetStorageAndConfig() (string, Config) {
 	storageConfig := viper.GetStringMap("storage")
 
 	var storages []string
