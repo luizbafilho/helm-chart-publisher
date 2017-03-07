@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"log"
 	"net/http"
 
@@ -20,9 +21,15 @@ func main() {
 
 	e := echo.New()
 	e.Use(middleware.Logger())
-	e.GET("/index.yaml", func(c echo.Context) error {
+	e.GET("/:repo/index.yaml", func(c echo.Context) error {
+		repo := c.Param("repo")
 
-		b, err := yaml.Marshal(publisher.GetIndex())
+		index, err := publisher.GetIndex(repo)
+		if err != nil {
+			return err
+		}
+
+		b, err := yaml.Marshal(index)
 		if err != nil {
 			return err
 		}
@@ -44,7 +51,12 @@ func main() {
 		}
 		defer src.Close()
 
-		if err := publisher.Publish(file.Filename, src); err != nil {
+		repos, ok := form.Value["repo"]
+		if !ok {
+			return errors.New("no repo provided")
+		}
+
+		if err := publisher.Publish(repos[0], file.Filename, src); err != nil {
 			return err
 		}
 

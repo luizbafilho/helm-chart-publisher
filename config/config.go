@@ -27,7 +27,7 @@ func initViper() {
 
 type Config map[string]interface{}
 
-func GetStorageAndConfig() (string, Config) {
+func GetStorage() (string, Config) {
 	storageConfig := viper.GetStringMap("storage")
 
 	var storages []string
@@ -42,4 +42,8 @@ func GetStorageAndConfig() (string, Config) {
 	}
 
 	return storages[0], viper.GetStringMap("storage." + storages[0])
+}
+
+func GetRepos() interface{} {
+	return viper.Get("repos")
 }
