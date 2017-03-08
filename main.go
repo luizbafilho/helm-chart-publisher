@@ -4,9 +4,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/luizbafilho/chart-server/api"
-	"github.com/luizbafilho/chart-server/publisher"
-	_ "github.com/luizbafilho/chart-server/storage/s3"
+	"github.com/luizbafilho/helm-chart-publisher/api"
+	"github.com/luizbafilho/helm-chart-publisher/publisher"
+	_ "github.com/luizbafilho/helm-chart-publisher/storage/s3"
 )
 
 func main() {

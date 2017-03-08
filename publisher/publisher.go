@@ -9,8 +9,8 @@ import (
 
 	yaml "gopkg.in/yaml.v2"
 
-	"github.com/luizbafilho/chart-server/config"
-	"github.com/luizbafilho/chart-server/storage"
+	"github.com/luizbafilho/helm-chart-publisher/config"
+	"github.com/luizbafilho/helm-chart-publisher/storage"
 	"github.com/pkg/errors"
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/provenance"

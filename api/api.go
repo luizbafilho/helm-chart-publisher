@@ -7,7 +7,7 @@ import (
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	"github.com/luizbafilho/chart-server/publisher"
+	"github.com/luizbafilho/helm-chart-publisher/publisher"
 )
 
 type API struct {

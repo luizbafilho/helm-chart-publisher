@@ -1,4 +1,4 @@
-package: github.com/luizbafilho/chart-server
+package: github.com/luizbafilho/helm-chart-publisher
 import:
 - package: github.com/labstack/echo
   version: ^3.0.3

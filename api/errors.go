@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo"
-	"github.com/luizbafilho/chart-server/publisher"
+	"github.com/luizbafilho/helm-chart-publisher/publisher"
 )
 
 type BadRequestErr string
