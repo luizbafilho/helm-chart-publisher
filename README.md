@@ -16,9 +16,9 @@ These are configuration options for the helm publisher.
 ```
 repos:
   - name: stable
-    bucket: kubernetes-charts
+    bucket: charts-bucket
   - name: incubator
-    bucket: kubernetes-charts-incubator
+    bucket: charts-bucket-incubator
   - name: test
     bucket: test-bucket
     directory: test
@@ -35,5 +35,18 @@ storage:
 To run `helm-chart-publisher` you just have to execute the binary passing the configuration file.
 
 ```shell
-$ helm-chart-publisher --config /etc/helm-publisher/config.yaml
+$ PORT=8080 helm-chart-publisher --config /etc/helm-publisher/config.yaml
+```
+
+You can publish a chart very easily by call a simple `curl`
+
+```
+curl -i -X PUT -F repo=stable -F chart=@$HOME/charts/stable/mariadb-0.5.9.tgz http://localhost:8080/charts
+```
+
+This command will upload the chart file to a Amazon S3 bucket, updates the current `index.yaml` and upload it too.
+
+The indexes are available via publisher under `/:repo/index.yaml` path. For example to access the `stable` index.
+```
+$ curl -i http://localhost:8080/stable/index.yaml
 ```
