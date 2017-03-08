@@ -50,6 +50,10 @@ func GetRepos() interface{} {
 }
 
 func ReadConfigFile(configFile string) error {
+	if configFile == "" {
+		return errors.New("no configuration file specified")
+	}
+
 	file, err := os.Open(configFile)
 	if err != nil {
 		return errors.Wrap(err, "open config file failed")
