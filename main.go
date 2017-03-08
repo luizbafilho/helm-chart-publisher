@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/luizbafilho/chart-server/api"
 	"github.com/luizbafilho/chart-server/publisher"
@@ -15,5 +16,11 @@ func main() {
 	}
 
 	a := api.New(publisher)
-	a.Serve(":8080")
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	a.Serve(":" + port)
 }
