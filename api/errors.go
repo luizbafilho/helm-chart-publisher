@@ -7,19 +7,26 @@ import (
 	"github.com/luizbafilho/chart-server/publisher"
 )
 
+type BadRequestErr string
+
+func (e BadRequestErr) Error() string {
+	return string(e)
+}
+
 type ErrResponse map[string]interface{}
 
 func CustomHTTPErrorHandler(err error, c echo.Context) {
 	code := http.StatusInternalServerError
 	response := ErrResponse{}
 
-	switch v := err.(type) {
+	switch err.(type) {
 	case publisher.ResourceNotFoundErr:
 		code = http.StatusNotFound
-		response = ErrResponse{"error": v.Error()}
-	default:
-		response = ErrResponse{"error": v.Error()}
+	case BadRequestErr:
+		code = http.StatusBadRequest
 	}
+
+	response = ErrResponse{"error": err.Error()}
 
 	c.JSON(code, response)
 }

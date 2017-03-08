@@ -1,7 +1,6 @@
 package api
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/ghodss/yaml"
@@ -62,8 +61,12 @@ func (api *API) publishChartHandler(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	file := form.File["charts"][0]
 
+	if len(form.File["chart"]) < 1 {
+		return BadRequestErr("no chart provided")
+	}
+
+	file := form.File["chart"][0]
 	src, err := file.Open()
 	if err != nil {
 		return err
@@ -72,7 +75,7 @@ func (api *API) publishChartHandler(c echo.Context) error {
 
 	repos, ok := form.Value["repo"]
 	if !ok {
-		return errors.New("no repo provided")
+		return BadRequestErr("no repository provided")
 	}
 
 	if err := api.publisher.Publish(repos[0], file.Filename, src); err != nil {
