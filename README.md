@@ -1,7 +1,7 @@
 # Helm Chart Publisher
 Helm Chart Publisher aims to help you build a nice CI/CD pipeline. It seats in front of a storage and send your charts to it and also updates the index.
 
-After receive a PUT request with a repository and the chart, the publisher will upload the chart file to your storage, updates the index and upload it too. Currently supports only Amazon S3, but OpenStack Swift, Google Cloud Storage and Filesystem are planned.
+After receiving a PUT request with a repository and the chart, the publisher will upload the chart file to your storage, updates the index and upload it too. Currently, supports only Amazon S3, but OpenStack Swift, Google Cloud Storage and Filesystem are planned.
 
 ## Configuration
 The configuration is based on a YAML file. In order to publish your charts, you have to configure a `storage` and one or more `repos` (Helm repositories).
@@ -43,7 +43,7 @@ You can publish a chart calling a simple `curl`
 $ curl -i -X PUT -F repo=stable -F chart=@$HOME/charts/stable/mariadb-0.5.9.tgz http://localhost:8080/charts
 ```
 
-This command will upload the chart file to a Amazon S3 bucket, updates the current `index.yaml` and upload it too.
+This command will upload the chart file to an Amazon S3 bucket, updates the current `index.yaml` and upload it too.
 
 The indexes are available via publisher under `/:repo/index.yaml` path. For example to access the `stable` index.
 ```
@@ -82,6 +82,13 @@ generated: 2017-03-07T17:34:47.965508312-03:00
 
 ```
 
+## Installing
+Get the latest `helm-chart-publisher` for your platform on the [releases](https://github.com/luizbafilho/helm-chart-publisher/releases) page
+```
+curl -o /usr/local/bin/helm-chart-publisher -sSL https://github.com/luizbafilho/helm-chart-publisher/releases/download/<version>/helm-chart-publisher_<os>-<arch>
+chmod +x /usr/local/bin/helm-chart-publisher
+```
+
 
 ## Roadmap
 - [ ] Storages
@@ -92,3 +99,7 @@ generated: 2017-03-07T17:34:47.965508312-03:00
   - [ ] api
   - [ ] publisher
   - [ ] storages
+  
+  
+## Notes
+This project is in a very early stage, suggestions are very welcome as PRs. Open an issue if the documentation it's not clear or you have any questions.
