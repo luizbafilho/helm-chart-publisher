@@ -1,8 +1,8 @@
-hash: 8e380459d01f6db12cf18d4730315c65fdb6fcdcdd9d282a8729bb0aebaa4e18
-updated: 2017-03-03T23:02:26.880673012-03:00
+hash: 7679225d78c27fedd2cc8eea9942101626c54f2142adc7ed1fd0d5ffc7da708a
+updated: 2017-03-08T15:42:24.204428002-03:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: 6669bce73b4e3bc922ff5ea3a3983ede26e02b39
+  version: fa1a4bc634fffa6ac468d8fb217e05475e063440
   subpackages:
   - aws
   - aws/awserr
@@ -68,6 +68,8 @@ imports:
   - json/parser
   - json/scanner
   - json/token
+- name: github.com/inconshreveable/mousetrap
+  version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/jmespath/go-jmespath
   version: 3433f3ea46d9f8019119e7dd41274e112a2359a9
 - name: github.com/labstack/echo
@@ -102,7 +104,9 @@ imports:
   subpackages:
   - mem
 - name: github.com/spf13/cast
-  version: 1ad7d3c5ed8e4f8ddd9dcf97ec8a02a212699c0f
+  version: ce135a4ebeee6cfe9a26c93ee0d37825f26113c7
+- name: github.com/spf13/cobra
+  version: 92ea23a837e66f46ac9e7d04fa826602b7b0a42d
 - name: github.com/spf13/jwalterweatherman
   version: fa7ca7e836cf3a8bb4ebf799f472c12d7e903d66
 - name: github.com/spf13/pflag
@@ -145,7 +149,7 @@ imports:
 - name: gopkg.in/yaml.v2
   version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 - name: k8s.io/helm
-  version: db531fd75fb2a1fb0841a98d9e55c58c21f70f4c
+  version: 1b330722aafcb8123114ae51f69d1e884a326f3e
   subpackages:
   - pkg/chartutil
   - pkg/ignore
@@ -156,7 +160,7 @@ imports:
   - pkg/tlsutil
   - pkg/urlutil
 - name: k8s.io/kubernetes
-  version: 029c3a408176b55c30846f0faedf56aae5992e9b
+  version: 7243c69eb523aa4377bce883e7c0dd76b84709a1
   subpackages:
   - pkg/api
   - pkg/api/errors
