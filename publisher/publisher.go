@@ -2,6 +2,7 @@ package publisher
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"sync"
@@ -93,7 +94,11 @@ func (p *Publisher) Publish(repoName string, filename string, chart io.Reader) e
 }
 
 func (p *Publisher) storeFile(r *Repo, filename string, content []byte) (*storage.PutResponse, error) {
-	return p.store.Put(r.Bucket, r.Path(filename), content)
+	resp, err := p.store.Put(r.Bucket, r.Path(filename), content)
+	if err != nil {
+		return nil, StorageErr{err, fmt.Sprintf("store file %s failed", filename)}
+	}
+	return resp, nil
 }
 
 func (p *Publisher) updateIndex(r *Repo, filename string, chartContent []byte) error {
@@ -106,7 +111,7 @@ func (p *Publisher) updateIndex(r *Repo, filename string, chartContent []byte) e
 	// Getting the current index
 	currentIndex, err := p.getIndex(r)
 	if err != nil {
-		return errors.Wrap(err, "get index failed")
+		return err
 	}
 
 	// Merging the current index with the temporary
@@ -142,12 +147,12 @@ func (p *Publisher) createNewIndex(r *Repo, filename string, chartContent []byte
 
 	chart, err := chartutil.LoadArchive(bytes.NewBuffer(chartContent))
 	if err != nil {
-		return nil, errors.Wrap(err, "Load helm chart failed")
+		return nil, HelmErr{err, "Load helm chart failed"}
 	}
 
 	hash, err := provenance.Digest(bytes.NewBuffer(chartContent))
 	if err != nil {
-		return nil, errors.Wrap(err, "Digest helm chart failed")
+		return nil, HelmErr{err, "Digest helm chart failed"}
 	}
 
 	index.Add(chart.Metadata, filename, p.store.GetURL(r.Bucket, r.Directory), hash)
@@ -168,7 +173,7 @@ func (p *Publisher) getIndex(repository *Repo) (*repo.IndexFile, error) {
 			return currentIndex.index, nil
 		}
 
-		return nil, err
+		return nil, StorageErr{err, fmt.Sprintf("get index.yaml for %s failed", repository.Name)}
 	}
 
 	index := repo.NewIndexFile()

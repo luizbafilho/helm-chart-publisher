@@ -35,7 +35,7 @@ func (repos *Repos) Get(name string) (*Repo, error) {
 		}
 	}
 
-	return nil, errors.New("Repository not defined")
+	return nil, ResourceNotFoundErr("repository not defined")
 }
 
 func decodeRepos(c interface{}) (Repos, error) {
@@ -46,7 +46,7 @@ func decodeRepos(c interface{}) (Repos, error) {
 
 	for _, r := range repos {
 		if r.Bucket == "" {
-			return nil, errors.New("Invalid config. Bucket is required.")
+			return nil, errors.New("invalid config: bucket is required")
 		}
 	}
 

@@ -18,6 +18,8 @@ type API struct {
 
 func New(publisher *publisher.Publisher) *API {
 	e := echo.New()
+	e.HTTPErrorHandler = CustomHTTPErrorHandler
+
 	e.Use(middleware.Logger())
 
 	api := &API{
