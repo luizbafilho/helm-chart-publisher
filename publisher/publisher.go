@@ -11,6 +11,7 @@ import (
 
 	"github.com/luizbafilho/helm-chart-publisher/config"
 	"github.com/luizbafilho/helm-chart-publisher/storage"
+	_ "github.com/luizbafilho/helm-chart-publisher/storage/s3"
 	"github.com/pkg/errors"
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/provenance"

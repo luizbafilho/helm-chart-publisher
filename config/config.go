@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 )
 
@@ -14,15 +15,15 @@ func init() {
 }
 
 func initViper() {
-	viper.SetConfigName("config")        // name of config file (without extension)
-	viper.AddConfigPath("/etc/" + APP)   // path to look for the config file in
-	viper.AddConfigPath("$HOME/." + APP) // call multiple times to add many search paths
-	viper.AddConfigPath(".")             // optionally look for config in the working directory
-	err := viper.ReadInConfig()          // Find and read the config file
-	if err != nil {                      // Handle errors reading the config file
-		fmt.Println("Error:", err)
-		os.Exit(1)
-	}
+	// viper.SetConfigName("config")        // name of config file (without extension)
+	// viper.AddConfigPath("/etc/" + APP)   // path to look for the config file in
+	// viper.AddConfigPath("$HOME/." + APP) // call multiple times to add many search paths
+	// viper.AddConfigPath(".")             // optionally look for config in the working directory
+	// err := viper.ReadInConfig()          // Find and read the config file
+	// if err != nil {                      // Handle errors reading the config file
+	// 	fmt.Println("Error:", err)
+	// 	os.Exit(1)
+	// }
 }
 
 type Config map[string]interface{}
@@ -46,4 +47,19 @@ func GetStorage() (string, Config) {
 
 func GetRepos() interface{} {
 	return viper.Get("repos")
+}
+
+func ReadConfigFile(configFile string) error {
+	file, err := os.Open(configFile)
+	if err != nil {
+		return errors.Wrap(err, "open config file failed")
+	}
+
+	viper.SetConfigType("yaml")
+	err = viper.ReadConfig(file)
+	if err != nil {
+		return errors.Wrap(err, "read config file failed")
+	}
+
+	return nil
 }
