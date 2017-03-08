@@ -1,5 +1,4 @@
 # Helm Chart Publisher
----
 Helm Chart Publisher aims to help you build a nice CI/CD pipeline. It seats in front of a storage and send your charts to it and also updates the index.
 
 After receive a PUT request with a repository and the chart, the publisher will upload the chart file to your storage, updates the index and upload it too. Currently supports only Amazon S3, but OpenStack Swift, Google Cloud Storage and Filesystem are planned.
@@ -38,10 +37,10 @@ To run `helm-chart-publisher` you just have to execute the binary passing the co
 $ PORT=8080 helm-chart-publisher --config /etc/helm-publisher/config.yaml
 ```
 
-You can publish a chart very easily by call a simple `curl`
+You can publish a chart calling a simple `curl`
 
 ```
-curl -i -X PUT -F repo=stable -F chart=@$HOME/charts/stable/mariadb-0.5.9.tgz http://localhost:8080/charts
+$ curl -i -X PUT -F repo=stable -F chart=@$HOME/charts/stable/mariadb-0.5.9.tgz http://localhost:8080/charts
 ```
 
 This command will upload the chart file to a Amazon S3 bucket, updates the current `index.yaml` and upload it too.
@@ -50,3 +49,46 @@ The indexes are available via publisher under `/:repo/index.yaml` path. For exam
 ```
 $ curl -i http://localhost:8080/stable/index.yaml
 ```
+But you can still access the `index.yaml` going directly to the storage. In our case:
+```
+$ curl -i https://s3-us-west-2.amazonaws.com/charts-bucket/index.yaml
+
+apiVersion: v1
+entries:
+  mariadb:
+  - created: 2017-03-07T17:36:04.782813678-03:00
+    description: Fast, reliable, scalable, and easy to use open-source relational
+      database system. MariaDB Server is intended for mission-critical, heavy-load
+      production systems as well as for embedding into mass-deployed software.
+    digest: d68c2852d7ac3e431cc65278d3ab74946b28479319a5707bc4405adf1dcd1393
+    engine: gotpl
+    home: https://mariadb.org
+    icon: https://bitnami.com/assets/stacks/mariadb/img/mariadb-stack-220x234.png
+    keywords:
+    - mariadb
+    - mysql
+    - database
+    - sql
+    maintainers:
+    - email: containers@bitnami.com
+      name: Bitnami
+    name: mariadb
+    sources:
+    - https://github.com/bitnami/bitnami-docker-mariadb
+    urls:
+    - https://s3-us-west-2.amazonaws.com/charts-bucket/mariadb-0.5.9.tgz
+    version: 0.5.9
+generated: 2017-03-07T17:34:47.965508312-03:00
+
+```
+
+
+## Roadmap
+- [ ] Storages
+  - [ ] Openstack Swift (WIP)
+  - [ ] Google Cloud Storage
+  - [ ] Filesystem
+- [ ] Tests
+  - [ ] api
+  - [ ] publisher
+  - [ ] storages
