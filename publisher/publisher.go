@@ -109,6 +109,9 @@ func (p *Publisher) updateIndex(r *Repo, filename string, chartContent []byte) e
 		return err
 	}
 
+	p.Lock()
+	defer p.Unlock()
+
 	// Getting the current index
 	currentIndex, err := p.getIndex(r)
 	if err != nil {
@@ -120,9 +123,7 @@ func (p *Publisher) updateIndex(r *Repo, filename string, chartContent []byte) e
 	currentIndex.SortEntries()
 
 	// Updating the in memory index copy
-	p.Lock()
 	p.indexes[r.Name].index = currentIndex
-	p.Unlock()
 
 	// Publishing the updated index to the store
 	indexContent, err := yaml.Marshal(currentIndex)
@@ -135,9 +136,7 @@ func (p *Publisher) updateIndex(r *Repo, filename string, chartContent []byte) e
 	}
 
 	// Updating the index hash in memory
-	p.Lock()
 	p.indexes[r.Name].hash = resp.Hash
-	p.Unlock()
 
 	return nil
 }
