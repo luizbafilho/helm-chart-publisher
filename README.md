@@ -1,16 +1,16 @@
 # Helm Chart Publisher
-Helm Chart Publisher aims to help you build a nice CI/CD pipeline. It seats in front of a storage and send your charts to it and also updates the index.
+Helm Chart Publisher aims to help you build a nice CI/CD pipeline. It seats in front of a object storage service (such as AWS S3, OpenStack Swift) or a filesystem, sends your charts to it and also updates the index.
 
-After receiving a PUT request with a repository and the chart, the publisher will upload the chart file to your storage, updates the index and upload it too. Currently, supports only Amazon S3, but OpenStack Swift, Google Cloud Storage and Filesystem are planned.
+After receiving a PUT request with a repository and the chart, the publisher will upload the chart file to your storage, update the index and upload it too. Currently, it supports only Amazon S3, but OpenStack Swift, Google Cloud Storage and Filesystem are planned.
 
 ## Configuration
 The configuration is based on a YAML file. In order to publish your charts, you have to configure a `storage` and one or more `repos` (Helm repositories).
 
-The Helm repository isolation can be done via bucket or directory. The publisher will create an `index.yaml` for each repository you configure.
+The Helm repository isolation can be done via bucket or a directory. The publisher will create an `index.yaml` for each repository you configure.
 
 Each repo requires `name` and `bucket`. You can also specify a `directory`, if you do so, the charts are going to be stored in `bucket` under the specified path.
 
-These are configuration options for the helm publisher.
+These are the configuration options for the helm publisher.
 
 ```
 repos:
@@ -31,13 +31,13 @@ storage:
 
 ## Usage
 
-To run `helm-chart-publisher` you just have to execute the binary passing the configuration file.
+To run `helm-chart-publisher` you just have to execute the binary passing providing the configuration file.
 
 ```shell
 $ PORT=8080 helm-chart-publisher --config /etc/helm-publisher/config.yaml
 ```
 
-You can publish a chart calling a simple `curl`
+You can publish a chart calling a simple `curl` command.
 
 ```
 $ curl -i -X PUT -F repo=stable -F chart=@$HOME/charts/stable/mariadb-0.5.9.tgz http://localhost:8080/charts
@@ -45,11 +45,11 @@ $ curl -i -X PUT -F repo=stable -F chart=@$HOME/charts/stable/mariadb-0.5.9.tgz 
 
 This command will upload the chart file to an Amazon S3 bucket, updates the current `index.yaml` and upload it too.
 
-The indexes are available via publisher under `/:repo/index.yaml` path. For example to access the `stable` index.
+The indexes are available via publisher under the `/:repo/index.yaml` path. For example to access the `stable` index.
 ```
 $ curl -i http://localhost:8080/stable/index.yaml
 ```
-But you can still access the `index.yaml` going directly to the storage. In our case:
+But you can still access the `index.yaml` going directly to the storage. In this case:
 ```
 $ curl -i https://s3-us-west-2.amazonaws.com/charts-bucket/index.yaml
 
@@ -102,4 +102,4 @@ chmod +x /usr/local/bin/helm-chart-publisher
   
   
 ## Notes
-This project is in a very early stage, suggestions are very welcome as PRs. Open an issue if the documentation it's not clear or you have any questions.
+This project is at a very early stage, suggestions are, as always, very welcome in the form of PR's. If you feel the documentation it's not clear or you have any questions, please open an issue for that.
