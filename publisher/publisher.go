@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"sync"
 
-	yaml "gopkg.in/yaml.v2"
+	yaml "github.com/ghodss/yaml"
 
 	"github.com/luizbafilho/helm-chart-publisher/config"
 	"github.com/luizbafilho/helm-chart-publisher/storage"
@@ -154,7 +154,6 @@ func (p *Publisher) createNewIndex(r *Repo, filename string, chartContent []byte
 	if err != nil {
 		return nil, HelmErr{err, "Digest helm chart failed"}
 	}
-
 	index.Add(chart.Metadata, filename, p.store.GetURL(r.Bucket, r.Directory), hash)
 
 	return index, nil

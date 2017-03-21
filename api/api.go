@@ -3,7 +3,7 @@ package api
 import (
 	"net/http"
 
-	"github.com/ghodss/yaml"
+	yaml "github.com/ghodss/yaml"
 
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
