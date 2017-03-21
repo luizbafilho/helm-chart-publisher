@@ -1,8 +1,8 @@
-hash: 7679225d78c27fedd2cc8eea9942101626c54f2142adc7ed1fd0d5ffc7da708a
-updated: 2017-03-08T15:42:24.204428002-03:00
+hash: c2ce61987f1176e91fb2fa640f71880232304cab9d934b21fd9d74600fbdb67b
+updated: 2017-03-14T11:32:44.370705736-03:00
 imports:
 - name: github.com/aws/aws-sdk-go
-  version: fa1a4bc634fffa6ac468d8fb217e05475e063440
+  version: 695fe24acaf9afe80b0ce261d4637f42ba0b4c7d
   subpackages:
   - aws
   - aws/awserr
@@ -93,6 +93,8 @@ imports:
   version: dda3de49cbfcec471bd7a70e6cc01fcc3ff90109
 - name: github.com/mitchellh/mapstructure
   version: db1efb556f84b25a0a13a04aad883943538ad2e0
+- name: github.com/ncw/swift
+  version: 5850d90fd74c3abb87b70ef3f4cb86198f01a6e6
 - name: github.com/pelletier/go-buffruneio
   version: df1e16fde7fc330a0ca68167c23bf7ed6ac31d6d
 - name: github.com/pelletier/go-toml

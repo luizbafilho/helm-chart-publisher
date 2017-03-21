@@ -21,3 +21,4 @@ import:
 - package: github.com/spf13/viper
 - package: github.com/spf13/afero
 - package: github.com/spf13/cobra
+- package: github.com/ncw/swift
