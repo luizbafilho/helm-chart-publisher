@@ -1,7 +1,9 @@
 package swift
 
 import (
+	"crypto/tls"
 	"errors"
+	"net/http"
 	"time"
 
 	"github.com/luizbafilho/helm-chart-publisher/storage"
@@ -20,6 +22,12 @@ func NewSwiftStorage(conf map[string]interface{}) (storage.Storage, error) {
 		return nil, err
 	}
 
+	transport := &http.Transport{
+		Proxy:               http.ProxyFromEnvironment,
+		MaxIdleConnsPerHost: 2048,
+		TLSClientConfig:     &tls.Config{InsecureSkipVerify: config.InsecureSkipVerify},
+	}
+
 	c := &swift.Connection{
 		UserName:       config.Username,
 		ApiKey:         config.Password,
@@ -29,6 +37,7 @@ func NewSwiftStorage(conf map[string]interface{}) (storage.Storage, error) {
 		EndpointType:   swift.EndpointType(config.EndpointType),
 		ConnectTimeout: 60 * time.Second,
 		Timeout:        15 * 60 * time.Second,
+		Transport:      transport,
 	}
 
 	// Authenticate
