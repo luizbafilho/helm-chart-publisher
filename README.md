@@ -27,6 +27,14 @@ storage:
     accessKey: AMAZON_ACCESS_KEY
     secretKey: AMAZON_SECRET_KEY
     region: us-west-2
+  swift:
+    username: SWIFT_USERNAME
+    password: SWIFT_USERNAME
+    tenant: some_tenant
+    authUrl: https://some-auth-url:5000/v2.0
+    endpointType: admin
+    container: "kube-charts"
+    insecureSkipVerify: false
 ```
 
 ## Usage
@@ -92,7 +100,7 @@ chmod +x /usr/local/bin/helm-chart-publisher
 
 ## Roadmap
 - [ ] Storages
-  - [ ] Openstack Swift (WIP)
+  - [x] Openstack Swift
   - [ ] Google Cloud Storage
   - [ ] Filesystem
 - [ ] Tests
