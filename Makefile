@@ -22,3 +22,5 @@ test:
 ghr:
 	go get -u github.com/tcnksm/ghr
 
+docker: build-all
+	docker build -t $(PKG_NAME) .
