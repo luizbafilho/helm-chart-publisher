@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/luizbafilho/helm-chart-publisher/storage"
@@ -59,6 +60,8 @@ func decodeAndValidateConfig(c map[string]interface{}) (*Config, error) {
 		return nil, err
 	}
 
+	mergeEnviromentVariables(&config)
+
 	if config.Username == "" {
 		return nil, errors.New("Invalid config. Username is required.")
 	}
@@ -76,4 +79,14 @@ func decodeAndValidateConfig(c map[string]interface{}) (*Config, error) {
 	}
 
 	return &config, nil
+}
+
+func mergeEnviromentVariables(config *Config) {
+	if username := os.Getenv("SWIFT_USERNAME"); username != "" {
+		config.Username = username
+	}
+
+	if password := os.Getenv("SWIFT_PASSWORD"); password != "" {
+		config.Password = password
+	}
 }

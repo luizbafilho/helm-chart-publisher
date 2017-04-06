@@ -38,6 +38,11 @@ func (api *API) Serve(address string) {
 func (api *API) registerHandlers() {
 	api.echo.GET("/:repo/index.yaml", api.getIndexHandler)
 	api.echo.PUT("/charts", api.publishChartHandler)
+	api.echo.GET("/health", api.healthHandler)
+}
+
+func (api *API) healthHandler(c echo.Context) error {
+	return c.String(http.StatusOK, "WORKING")
 }
 
 func (api *API) getIndexHandler(c echo.Context) error {

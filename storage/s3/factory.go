@@ -1,6 +1,8 @@
 package s3
 
 import (
+	"os"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -42,6 +44,8 @@ func decodeAndValidateConfig(c map[string]interface{}) (*Config, error) {
 		return nil, err
 	}
 
+	mergeEnviromentVariables(&config)
+
 	if config.AccessKey == "" {
 		return nil, errors.New("Invalid config. Access Key is required.")
 	}
@@ -56,4 +60,14 @@ func decodeAndValidateConfig(c map[string]interface{}) (*Config, error) {
 	}
 
 	return &config, nil
+}
+
+func mergeEnviromentVariables(config *Config) {
+	if accessKey := os.Getenv("AWS_ACCESS_KEY"); accessKey != "" {
+		config.AccessKey = accessKey
+	}
+
+	if secretKey := os.Getenv("AWS_SECRET_KEY"); secretKey != "" {
+		config.SecretKey = secretKey
+	}
 }
