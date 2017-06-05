@@ -7,13 +7,11 @@ import (
 
 // GetResponse ...
 type GetResponse struct {
-	Hash string
 	Body []byte
 }
 
 // PutResponse ...
 type PutResponse struct {
-	Hash string
 }
 
 // Storage ...
@@ -21,7 +19,7 @@ type Storage interface {
 	Name() string
 
 	Put(bucket string, path string, content []byte) (*PutResponse, error)
-	Get(bucket string, path string, hash string) (*GetResponse, error)
+	Get(bucket string, path string) (*GetResponse, error)
 
 	GetURL(bucket string, directory string) string
 }

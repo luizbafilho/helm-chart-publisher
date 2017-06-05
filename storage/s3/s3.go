@@ -44,11 +44,10 @@ func parseError(err error) error {
 }
 
 // Get ...
-func (s *S3Store) Get(bucket string, path string, hash string) (*storage.GetResponse, error) {
+func (s *S3Store) Get(bucket string, path string) (*storage.GetResponse, error) {
 	params := &s3.GetObjectInput{
-		Bucket:      aws.String(bucket),
-		Key:         aws.String(path),
-		IfNoneMatch: aws.String(hash),
+		Bucket: aws.String(bucket),
+		Key:    aws.String(path),
 	}
 
 	resp, err := s.s3.GetObject(params)
@@ -62,7 +61,6 @@ func (s *S3Store) Get(bucket string, path string, hash string) (*storage.GetResp
 	}
 
 	return &storage.GetResponse{
-		Hash: *resp.ETag,
 		Body: body,
 	}, nil
 }
@@ -77,14 +75,12 @@ func (s *S3Store) Put(bucket string, path string, content []byte) (*storage.PutR
 		ContentType: aws.String("application/gzip"),
 	}
 
-	resp, err := s.s3.PutObject(params)
+	_, err := s.s3.PutObject(params)
 	if err != nil {
 		return nil, errors.Wrap(err, "[S3] PutObject failed")
 	}
 
-	return &storage.PutResponse{
-		Hash: *resp.ETag,
-	}, nil
+	return &storage.PutResponse{}, nil
 }
 
 // GetURL ...

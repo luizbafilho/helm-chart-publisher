@@ -122,21 +122,21 @@ func (p *Publisher) updateIndex(r *Repo, filename string, chartContent []byte) e
 	currentIndex.Merge(newIndex)
 	currentIndex.SortEntries()
 
-	// Updating the in memory index copy
-	p.indexes[r.Name].index = currentIndex
+	// // Updating the in memory index copy
+	// p.indexes[r.Name].index = currentIndex
 
 	// Publishing the updated index to the store
 	indexContent, err := yaml.Marshal(currentIndex)
 	if err != nil {
 		return err
 	}
-	resp, err := p.storeFile(r, "index.yaml", indexContent)
+	_, err = p.storeFile(r, "index.yaml", indexContent)
 	if err != nil {
 		return errors.Wrap(err, "store index.yaml failed")
 	}
 
 	// Updating the index hash in memory
-	p.indexes[r.Name].hash = resp.Hash
+	// p.indexes[r.Name].hash = resp.Hash
 
 	return nil
 }
@@ -163,23 +163,21 @@ func (p *Publisher) createNewIndex(r *Repo, filename string, chartContent []byte
 // for that index. If the hash hasn't changed, the store should return a NotModifiedErr so we can return the
 // current valid index stored in memory.
 func (p *Publisher) getIndex(repository *Repo) (*repo.IndexFile, error) {
-	currentIndex := p.indexes[repository.Name]
+	index := repo.NewIndexFile()
 
-	resp, err := p.store.Get(repository.Bucket, repository.Path("index.yaml"), currentIndex.hash)
+	resp, err := p.store.Get(repository.Bucket, repository.Path("index.yaml"))
 	if err != nil {
 		switch err.(type) {
-		case storage.NotModifiedErr, storage.PathNotFoundErr:
-			return currentIndex.index, nil
+		case storage.PathNotFoundErr:
+			return index, nil
 		}
 
 		return nil, StorageErr{err, fmt.Sprintf("get index.yaml for %s failed", repository.Name)}
 	}
 
-	index := repo.NewIndexFile()
 	yaml.Unmarshal(resp.Body, index)
 
 	p.indexes[repository.Name] = &Index{
-		hash:  resp.Hash,
 		index: index,
 	}
 

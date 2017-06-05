@@ -51,17 +51,16 @@ func parseError(err error) error {
 }
 
 // Get ...
-func (s *SwiftStore) Get(bucket string, path string, hash string) (*storage.GetResponse, error) {
+func (s *SwiftStore) Get(bucket string, path string) (*storage.GetResponse, error) {
 	var b bytes.Buffer
 	content := bufio.NewWriter(&b)
 
-	headers, err := s.swift.ObjectGet(bucket, path, content, false, swift.Headers{"If-None-Match": hash})
+	_, err := s.swift.ObjectGet(bucket, path, content, false, swift.Headers{})
 	if err != nil {
 		return nil, parseError(err)
 	}
 
 	return &storage.GetResponse{
-		Hash: headers["Etag"],
 		Body: b.Bytes(),
 	}, nil
 }
@@ -69,14 +68,12 @@ func (s *SwiftStore) Get(bucket string, path string, hash string) (*storage.GetR
 // Put stores the content
 func (s *SwiftStore) Put(bucket string, path string, content []byte) (*storage.PutResponse, error) {
 	r := bytes.NewReader(content)
-	headers, err := s.swift.ObjectPut(bucket, path, r, false, "", "application/gzip", swift.Headers{})
+	_, err := s.swift.ObjectPut(bucket, path, r, false, "", "application/gzip", swift.Headers{})
 	if err != nil {
 		return nil, parseError(err)
 	}
 
-	return &storage.PutResponse{
-		Hash: headers["Etag"],
-	}, nil
+	return &storage.PutResponse{}, nil
 }
 
 // GetURL ...
