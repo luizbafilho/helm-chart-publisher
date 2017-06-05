@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"strconv"
 
 	"github.com/luizbafilho/helm-chart-publisher/storage"
 	"github.com/ncw/swift"
@@ -68,7 +69,8 @@ func (s *SwiftStore) Get(bucket string, path string) (*storage.GetResponse, erro
 // Put stores the content
 func (s *SwiftStore) Put(bucket string, path string, content []byte) (*storage.PutResponse, error) {
 	r := bytes.NewReader(content)
-	_, err := s.swift.ObjectPut(bucket, path, r, false, "", "application/gzip", swift.Headers{})
+	h := swift.Headers{"Content-Length": strconv.Itoa(len(content))}
+	_, err := s.swift.ObjectPut(bucket, path, r, true, "", "application/gzip", h)
 	if err != nil {
 		return nil, parseError(err)
 	}
