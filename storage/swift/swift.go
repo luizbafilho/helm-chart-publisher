@@ -8,6 +8,7 @@ import (
 
 	"github.com/luizbafilho/helm-chart-publisher/storage"
 	"github.com/ncw/swift"
+	"github.com/pkg/errors"
 )
 
 type Config struct {
@@ -68,9 +69,16 @@ func (s *SwiftStore) Get(bucket string, path string) (*storage.GetResponse, erro
 
 // Put stores the content
 func (s *SwiftStore) Put(bucket string, path string, content []byte) (*storage.PutResponse, error) {
+	// This authentication is done because there is some weird bug when authentication retry
+	// has to happen, making the swift package send a request with zero byte body.
+	// To avoid that, I'm authenticating before the PUT call, to make sure no retry will be need.
+	if err := s.swift.Authenticate(); err != nil {
+		return nil, parseError(errors.Wrap(err, "authentication failed"))
+	}
+
 	r := bytes.NewReader(content)
 	h := swift.Headers{"Content-Length": strconv.Itoa(len(content))}
-	_, err := s.swift.ObjectPut(bucket, path, r, true, "", "application/gzip", h)
+	_, err := s.swift.ObjectPut(bucket, path, r, true, "", "", h)
 	if err != nil {
 		return nil, parseError(err)
 	}
