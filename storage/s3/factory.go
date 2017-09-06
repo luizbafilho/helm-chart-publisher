@@ -1,6 +1,7 @@
 package s3
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -43,6 +44,7 @@ func decodeAndValidateConfig(c map[string]interface{}) (*Config, error) {
 	if err := mapstructure.Decode(c, &config); err != nil {
 		return nil, err
 	}
+	fmt.Println("config: ", config)
 
 	mergeEnviromentVariables(&config)
 
