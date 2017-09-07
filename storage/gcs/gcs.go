@@ -6,13 +6,14 @@ import (
 	gcsStorage "cloud.google.com/go/storage"
 	"context"
 	"github.com/luizbafilho/helm-chart-publisher/storage"
+	"github.com/pkg/errors"
 	"io/ioutil"
+
 )
 
 type Config struct {
-	GoogleApplicationCredentials string
-	Project                      string
-	Bucket                       string
+	// for public repos, give allUsers the Storage Object Viewer role for bucket
+	// configuration all done inside of 'Application Default Credentials'
 }
 
 type GcsStore struct {
@@ -47,7 +48,7 @@ func (s *GcsStore) Get(bucket string, path string) (*storage.GetResponse, error)
 
 	body, err := ioutil.ReadAll(r)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "[GCS] Read failed")
 	}
 
 	return &storage.GetResponse{
@@ -57,9 +58,6 @@ func (s *GcsStore) Get(bucket string, path string) (*storage.GetResponse, error)
 
 // Put stores the content
 func (s *GcsStore) Put(bucket string, path string, content []byte) (*storage.PutResponse, error) {
-	// This authentication is done because there is some weird bug when authentication retry
-	// has to happen, making the swift package send a request with zero byte body.
-	// To avoid that, I'm authenticating before the PUT call, to make sure no retry will be need.
 	gcsBucket := s.gcs.Bucket(bucket)
 	obj := gcsBucket.Object(path)
 
@@ -68,11 +66,11 @@ func (s *GcsStore) Put(bucket string, path string, content []byte) (*storage.Put
 
 	// Write some text to obj. This will overwrite whatever is there.
 	if _, err := w.Write(content); err != nil {
-		// TODO: Handle error.
+		return nil, errors.Wrap(err, "[GCS] Write failed")
 	}
 	// Close, just like writing a file.
 	if err := w.Close(); err != nil {
-		// TODO: Handle error.
+		return nil, errors.Wrap(err, "[GCS] Write failed on Close()")
 	}
 
 	return &storage.PutResponse{}, nil
@@ -80,6 +78,5 @@ func (s *GcsStore) Put(bucket string, path string, content []byte) (*storage.Put
 
 // GetURL ...
 func (s *GcsStore) GetURL(bucket string, path string) string {
-	domain := "storage.cloud.google.com"
-	return fmt.Sprintf("%s/%s/%s", domain, bucket, path)
+	return fmt.Sprintf("https://%s.storage.googleapis.com/%s", bucket, path)
 }

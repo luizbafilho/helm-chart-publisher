@@ -1,7 +1,7 @@
 # Helm Chart Publisher
 Helm Chart Publisher aims to help you build a nice CI/CD pipeline. It seats in front of a object storage service (such as AWS S3, OpenStack Swift) or a filesystem, sends your charts to it and also updates the index.
 
-After receiving a PUT request with a repository and the chart, the publisher will upload the chart file to your storage, update the index and upload it too. Currently, it supports only Amazon S3, but OpenStack Swift, Google Cloud Storage and Filesystem are planned.
+After receiving a PUT request with a repository and the chart, the publisher will upload the chart file to your storage, update the index and upload it too. Currently, it supports Amazon S3, OpenStack Swift, and Google Cloud Storage. Filesystem storage is planned.
 
 ## Configuration
 The configuration is based on a YAML file. In order to publish your charts, you have to configure a `storage` and one or more `repos` (Helm repositories).
@@ -23,6 +23,7 @@ repos:
     directory: test
 
 storage:
+  gcs: {} # uses GCloud Application Default Credentials
   s3:
     accessKey: AMAZON_ACCESS_KEY
     secretKey: AMAZON_SECRET_KEY
@@ -101,7 +102,7 @@ chmod +x /usr/local/bin/helm-chart-publisher
 ## Roadmap
 - [ ] Storages
   - [x] Openstack Swift
-  - [ ] Google Cloud Storage
+  - [x] Google Cloud Storage
   - [ ] Filesystem
 - [ ] Tests
   - [ ] api
@@ -110,4 +111,4 @@ chmod +x /usr/local/bin/helm-chart-publisher
   
   
 ## Notes
-This project is at a very early stage, suggestions are, as always, very welcome in the form of PR's. If you feel the documentation it's not clear or you have any questions, please open an issue for that.
+This project is at a very early stage, suggestions are, as always, very welcome in the form of PR's. If you feel the documentation is not clear or you have any questions, please open an issue for that.
