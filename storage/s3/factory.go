@@ -1,7 +1,6 @@
 package s3
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
