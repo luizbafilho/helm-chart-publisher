@@ -10,8 +10,9 @@ import (
 )
 
 type Config struct {
-	project string
-	bucket  string
+	GoogleApplicationCredentials string
+	Project                      string
+	Bucket                       string
 }
 
 type GcsStore struct {
@@ -26,15 +27,9 @@ func (s *GcsStore) Name() string {
 }
 
 func parseError(err error) error {
-	if s3Err, ok := err.(awserr.Error); ok {
-		switch s3Err.Code() {
-		case "NotModified":
-			return storage.NotModifiedErr{}
-		case "ErrObjectNotExist":
-			return storage.PathNotFoundErr{}
-		}
+	if err == gcsStorage.ErrObjectNotExist {
+		return storage.PathNotFoundErr{}
 	}
-
 	return err
 }
 
@@ -42,24 +37,16 @@ func parseError(err error) error {
 func (s *GcsStore) Get(bucket string, path string) (*storage.GetResponse, error) {
 	gcsBucket := s.gcs.Bucket(bucket)
 	obj := gcsBucket.Object(path)
-	fmt.Println("gcsBucket: ", gcsBucket)
-	fmt.Println("obj: ", obj)
 
 	ctx := context.Background()
-	fmt.Println("ctx: ", ctx)
 	r, err := obj.NewReader(ctx)
-	fmt.Println("r: ", r)
 	if err != nil {
 		return nil, parseError(err)
-		fmt.Println("R err: ", err)
-		return nil, err
 	}
 	defer r.Close()
 
 	body, err := ioutil.ReadAll(r)
-	fmt.Println("body: ", body)
 	if err != nil {
-		fmt.Println("S err: ", err)
 		return nil, err
 	}
 
@@ -74,20 +61,13 @@ func (s *GcsStore) Put(bucket string, path string, content []byte) (*storage.Put
 	// has to happen, making the swift package send a request with zero byte body.
 	// To avoid that, I'm authenticating before the PUT call, to make sure no retry will be need.
 	gcsBucket := s.gcs.Bucket(bucket)
-	fmt.Println("gcsBucket: ", gcsBucket)
 	obj := gcsBucket.Object(path)
-	fmt.Println("obj: ", obj)
 
 	ctx := context.Background()
-	fmt.Println("ctx: ", ctx)
 	w := obj.NewWriter(ctx)
-	fmt.Println("w: ", w)
 
-	w.ObjectAttrs.ContentType = "application/gzip"
-	w.ObjectAttrs.ContentEncoding = "gzip"
-	w.ChunkSize = 65536
 	// Write some text to obj. This will overwrite whatever is there.
-	if _, err := w.Write([]byte("XXXXXXXXXXX")); err != nil {
+	if _, err := w.Write(content); err != nil {
 		// TODO: Handle error.
 	}
 	// Close, just like writing a file.

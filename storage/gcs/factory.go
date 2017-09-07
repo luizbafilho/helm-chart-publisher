@@ -7,6 +7,7 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"
+	"os"
 )
 
 func init() {
@@ -21,9 +22,6 @@ func NewGcsStorage(conf map[string]interface{}) (storage.Storage, error) {
 
 	ctx := context.Background()
 	client, err := gcsStorage.NewClient(ctx)
-	fmt.Println("ctx: ", ctx)
-	fmt.Println("client: ", client)
-	fmt.Println("err: ", err)
 
 	return &GcsStore{
 		name:   "gcs",
@@ -37,22 +35,25 @@ func decodeAndValidateConfig(c map[string]interface{}) (*Config, error) {
 	if err := mapstructure.Decode(c, &config); err != nil {
 		return nil, err
 	}
-	fmt.Println("c: ", c)
 
 	mergeEnviromentVariables(&config)
-	fmt.Println("config: ", config)
 
-	if config.project == "" {
-		return nil, errors.New("Invalid config. project is required.")
+	if config.GoogleApplicationCredentials == "" {
+		return nil, errors.New("Invalid config. GoogleApplicationCredentials is required.")
 	}
-	if config.bucket == "" {
-		return nil, errors.New("Invalid config. bucket is required.")
+	if config.Project == "" {
+		return nil, errors.New("Invalid config. Project is required.")
+	}
+	if config.Bucket == "" {
+		return nil, errors.New("Invalid config. Bucket is required.")
 	}
 
 	return &config, nil
 }
 
 func mergeEnviromentVariables(config *Config) {
-	config.project = "staging-165617"
-	config.bucket = "helm-charts-staging-165617"
+	if googleApplicationCredentials := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS"); googleApplicationCredentials != "" {
+		config.GoogleApplicationCredentials = googleApplicationCredentials
+	}
+
 }
