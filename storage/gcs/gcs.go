@@ -10,15 +10,8 @@ import (
 	"io/ioutil"
 
 )
-
-type Config struct {
-	// for public repos, give allUsers the Storage Object Viewer role for bucket
-	// configuration all done inside of 'Application Default Credentials'
-}
-
 type GcsStore struct {
 	name   string
-	config *Config
 	gcs    *gcsStorage.Client
 }
 
