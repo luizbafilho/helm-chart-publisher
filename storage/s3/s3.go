@@ -17,6 +17,7 @@ type Config struct {
 	SecretKey string
 	Bucket    string
 	Region    string
+	Url       string
 }
 
 type S3Store struct {
@@ -90,5 +91,9 @@ func (s *S3Store) GetURL(bucket string, path string) string {
 		domain = "s3.amazonaws.com"
 	}
 
-	return fmt.Sprintf("https://%s/%s/%s", domain, bucket, path)
+	if s.config.Url != "" {
+		return fmt.Sprintf(s.config.Url)
+	} else {
+		return fmt.Sprintf("https://%s/%s/%s", domain, bucket, path)
+	}
 }
