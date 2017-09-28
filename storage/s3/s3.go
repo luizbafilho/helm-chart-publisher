@@ -17,7 +17,6 @@ type Config struct {
 	SecretKey string
 	Bucket    string
 	Region    string
-	Url       string
 }
 
 type S3Store struct {
@@ -85,15 +84,14 @@ func (s *S3Store) Put(bucket string, path string, content []byte) (*storage.PutR
 }
 
 // GetURL ...
-func (s *S3Store) GetURL(bucket string, path string) string {
-	domain := fmt.Sprintf("s3-%s.amazonaws.com", s.config.Region)
-	if s.config.Region == "us-east-1" {
-		domain = "s3.amazonaws.com"
-	}
-
-	if s.config.Url != "" {
-		return fmt.Sprintf(s.config.Url)
+func (s *S3Store) GetURL(bucket string, path string, url string) string {
+	if url != "" {
+		return fmt.Sprintf(url)
 	} else {
+		domain := fmt.Sprintf("s3-%s.amazonaws.com", s.config.Region)
+		if s.config.Region == "us-east-1" {
+			domain = "s3.amazonaws.com"
+		}
 		return fmt.Sprintf("https://%s/%s/%s", domain, bucket, path)
 	}
 }
