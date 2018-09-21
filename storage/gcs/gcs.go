@@ -70,6 +70,10 @@ func (s *GcsStore) Put(bucket string, path string, content []byte) (*storage.Put
 }
 
 // GetURL ...
-func (s *GcsStore) GetURL(bucket string, path string) string {
-	return fmt.Sprintf("https://%s.storage.googleapis.com/%s", bucket, path)
+func (s *GcsStore) GetURL(bucket string, path string, url string) string {
+	if url != "" {
+		return fmt.Sprintf(url)
+	} else {
+		return fmt.Sprintf("https://%s.storage.googleapis.com/%s", bucket, path)
+	}
 }

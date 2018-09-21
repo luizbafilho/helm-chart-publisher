@@ -11,6 +11,7 @@ type Repo struct {
 	Name      string
 	Bucket    string
 	Directory string
+	Url       string
 }
 
 // Path ...
