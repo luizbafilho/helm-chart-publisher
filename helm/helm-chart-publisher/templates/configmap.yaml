@@ -1,0 +1,19 @@
+apiVersion: v1
+data:
+  config.yaml: |
+    repos:
+      - name: hcom
+        bucket: hcom-helm-repository
+
+    storage:
+      s3:
+        bucket: hcom-helm-repository
+        region: us-west-2
+kind: ConfigMap
+metadata:
+  creationTimestamp: 2018-09-25T15:49:28Z
+  name: publisher-config
+  namespace: default
+  resourceVersion: "7534"
+  selfLink: /api/v1/namespaces/default/configmaps/publisher-config
+  uid: 96212dbf-c0da-11e8-9f6e-08002743bc8f
