@@ -1,10 +1,7 @@
 package s3
 
 import (
-	"os"
-
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/luizbafilho/helm-chart-publisher/storage"
@@ -23,13 +20,10 @@ func NewS3Storage(conf map[string]interface{}) (storage.Storage, error) {
 		return nil, err
 	}
 
-	creds := credentials.NewStaticCredentials(config.AccessKey, config.SecretKey, "")
-	_, err = creds.Get()
-	if err != nil {
-		return nil, errors.Wrap(err, "bad credentials")
-	}
-	cfg := aws.NewConfig().WithRegion(config.Region).WithCredentials(creds)
-	svc := s3.New(session.New(), cfg)
+	sess := session.Must(session.NewSession(&aws.Config{
+		Region: aws.String(config.Region),
+	}))
+	svc := s3.New(sess)
 
 	return &S3Store{
 		name:   "s3",
@@ -44,14 +38,6 @@ func decodeAndValidateConfig(c map[string]interface{}) (*Config, error) {
 		return nil, err
 	}
 
-	mergeEnviromentVariables(&config)
-
-	if config.AccessKey == "" {
-		return nil, errors.New("Invalid config. Access Key is required.")
-	}
-	if config.SecretKey == "" {
-		return nil, errors.New("Invalid config. Secret Key is required.")
-	}
 	if config.Bucket == "" {
 		return nil, errors.New("Invalid config. Bucket is required.")
 	}
@@ -60,14 +46,4 @@ func decodeAndValidateConfig(c map[string]interface{}) (*Config, error) {
 	}
 
 	return &config, nil
-}
-
-func mergeEnviromentVariables(config *Config) {
-	if accessKey := os.Getenv("AWS_ACCESS_KEY"); accessKey != "" {
-		config.AccessKey = accessKey
-	}
-
-	if secretKey := os.Getenv("AWS_SECRET_KEY"); secretKey != "" {
-		config.SecretKey = secretKey
-	}
 }

@@ -22,7 +22,7 @@ func NewGcsStorage(conf map[string]interface{}) (storage.Storage, error) {
 	}
 
 	return &GcsStore{
-		name:   "gcs",
-		gcs:    client,
+		name: "gcs",
+		gcs:  client,
 	}, nil
 }
