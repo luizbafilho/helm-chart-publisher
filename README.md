@@ -28,8 +28,7 @@ repos:
 storage:
   gcs: {} # uses GCloud Application Default Credentials
   s3:
-    accessKey: AMAZON_ACCESS_KEY
-    secretKey: AMAZON_SECRET_KEY
+    bucket: charts-bucket-incubator
     region: us-west-2
   swift:
     username: SWIFT_USERNAME
@@ -41,13 +40,40 @@ storage:
     insecureSkipVerify: false
 ```
 
-## Usage
+## Running
+You can either:
+- Run as a binary
+- Run as a Docker container
+
+### Binary
+Get the latest `helm-chart-publisher` for your platform on the [releases](https://github.com/luizbafilho/helm-chart-publisher/releases) page
+```
+curl -o /usr/local/bin/helm-chart-publisher -sSL https://github.com/luizbafilho/helm-chart-publisher/releases/download/<version>/helm-chart-publisher_<os>-<arch>
+chmod +x /usr/local/bin/helm-chart-publisher
+```
 
 To run `helm-chart-publisher` you just have to execute the binary passing providing the configuration file.
 
 ```shell
 $ PORT=8080 helm-chart-publisher --config /etc/helm-publisher/config.yaml
 ```
+
+### Docker Container
+To run the `helm-chart-publisher` from within a container run `make docker`. This will create the `helm-chart-publisher`
+image.
+
+Start the container using a command in the format:
+```
+docker run -p 8080:8080 -v /Users/$(whoami)/config:/etc/helm-chart-publisher/ -v /Users/$(whoami)/.aws:/root/.aws helm-chart-publisher
+```
+
+- The publisher runs on 8080 within the container and the ports must be exposed
+- The config YAML must be mounted into the /etc/helm-chart-publisher directory
+- .aws configuration should also be mounted in to prevent restarting container when credentials expire
+
+
+
+## Usage 
 
 You can publish a chart calling a simple `curl` command.
 
@@ -94,12 +120,8 @@ generated: 2017-03-07T17:34:47.965508312-03:00
 
 ```
 
-## Installing
-Get the latest `helm-chart-publisher` for your platform on the [releases](https://github.com/luizbafilho/helm-chart-publisher/releases) page
-```
-curl -o /usr/local/bin/helm-chart-publisher -sSL https://github.com/luizbafilho/helm-chart-publisher/releases/download/<version>/helm-chart-publisher_<os>-<arch>
-chmod +x /usr/local/bin/helm-chart-publisher
-```
+
+
 
 
 ## Roadmap

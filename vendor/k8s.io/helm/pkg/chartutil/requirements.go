@@ -1,5 +1,5 @@
 /*
-Copyright 2016 The Kubernetes Authors All rights reserved.
+Copyright The Helm Authors.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
@@ -23,6 +23,7 @@ import (
 
 	"github.com/ghodss/yaml"
 	"k8s.io/helm/pkg/proto/hapi/chart"
+	"k8s.io/helm/pkg/version"
 )
 
 const (
@@ -44,7 +45,7 @@ var (
 type Dependency struct {
 	// Name is the name of the dependency.
 	//
-	// This must mach the name in the dependency's Chart.yaml.
+	// This must match the name in the dependency's Chart.yaml.
 	Name string `json:"name"`
 	// Version is the version (range) of this chart.
 	//
@@ -57,11 +58,16 @@ type Dependency struct {
 	// used to fetch the repository index.
 	Repository string `json:"repository"`
 	// A yaml path that resolves to a boolean, used for enabling/disabling charts (e.g. subchart1.enabled )
-	Condition string `json:"condition"`
+	Condition string `json:"condition,omitempty"`
 	// Tags can be used to group charts for enabling/disabling together
-	Tags []string `json:"tags"`
+	Tags []string `json:"tags,omitempty"`
 	// Enabled bool determines if chart should be loaded
-	Enabled bool `json:"enabled"`
+	Enabled bool `json:"enabled,omitempty"`
+	// ImportValues holds the mapping of source values to parent key to be imported. Each item can be a
+	// string or pair of child/parent sublist items.
+	ImportValues []interface{} `json:"import-values,omitempty"`
+	// Alias usable alias to be used for the chart
+	Alias string `json:"alias,omitempty"`
 }
 
 // ErrNoRequirementsFile to detect error condition
@@ -213,6 +219,32 @@ func ProcessRequirementsTags(reqs *Requirements, cvals Values) {
 
 }
 
+func getAliasDependency(charts []*chart.Chart, aliasChart *Dependency) *chart.Chart {
+	var chartFound chart.Chart
+	for _, existingChart := range charts {
+		if existingChart == nil {
+			continue
+		}
+		if existingChart.Metadata == nil {
+			continue
+		}
+		if existingChart.Metadata.Name != aliasChart.Name {
+			continue
+		}
+		if !version.IsCompatibleRange(aliasChart.Version, existingChart.Metadata.Version) {
+			continue
+		}
+		chartFound = *existingChart
+		newMetadata := *existingChart.Metadata
+		if aliasChart.Alias != "" {
+			newMetadata.Name = aliasChart.Alias
+		}
+		chartFound.Metadata = &newMetadata
+		return &chartFound
+	}
+	return nil
+}
+
 // ProcessRequirementsEnabled removes disabled charts from dependencies
 func ProcessRequirementsEnabled(c *chart.Chart, v *chart.Config) error {
 	reqs, err := LoadRequirements(c)
@@ -225,6 +257,36 @@ func ProcessRequirementsEnabled(c *chart.Chart, v *chart.Config) error {
 		// no requirements to process
 		return nil
 	}
+
+	var chartDependencies []*chart.Chart
+	// If any dependency is not a part of requirements.yaml
+	// then this should be added to chartDependencies.
+	// However, if the dependency is already specified in requirements.yaml
+	// we should not add it, as it would be anyways processed from requirements.yaml
+
+	for _, existingDependency := range c.Dependencies {
+		var dependencyFound bool
+		for _, req := range reqs.Dependencies {
+			if existingDependency.Metadata.Name == req.Name && version.IsCompatibleRange(req.Version, existingDependency.Metadata.Version) {
+				dependencyFound = true
+				break
+			}
+		}
+		if !dependencyFound {
+			chartDependencies = append(chartDependencies, existingDependency)
+		}
+	}
+
+	for _, req := range reqs.Dependencies {
+		if chartDependency := getAliasDependency(c.Dependencies, req); chartDependency != nil {
+			chartDependencies = append(chartDependencies, chartDependency)
+		}
+		if req.Alias != "" {
+			req.Name = req.Alias
+		}
+	}
+	c.Dependencies = chartDependencies
+
 	// set all to true
 	for _, lr := range reqs.Dependencies {
 		lr.Enabled = true
@@ -233,10 +295,15 @@ func ProcessRequirementsEnabled(c *chart.Chart, v *chart.Config) error {
 	if err != nil {
 		return err
 	}
+	// convert our values back into config
+	yvals, err := cvals.YAML()
+	if err != nil {
+		return err
+	}
+	cc := chart.Config{Raw: yvals}
 	// flag dependencies as enabled/disabled
 	ProcessRequirementsTags(reqs, cvals)
 	ProcessRequirementsConditions(reqs, cvals)
-
 	// make a map of charts to remove
 	rm := map[string]bool{}
 	for _, r := range reqs.Dependencies {
@@ -256,13 +323,149 @@ func ProcessRequirementsEnabled(c *chart.Chart, v *chart.Config) error {
 	}
 	// recursively call self to process sub dependencies
 	for _, t := range cd {
-		err := ProcessRequirementsEnabled(t, v)
+		err := ProcessRequirementsEnabled(t, &cc)
 		// if its not just missing requirements file, return error
 		if nerr, ok := err.(ErrNoRequirementsFile); !ok && err != nil {
 			return nerr
 		}
 	}
 	c.Dependencies = cd
+
+	return nil
+}
+
+// pathToMap creates a nested map given a YAML path in dot notation.
+func pathToMap(path string, data map[string]interface{}) map[string]interface{} {
+	if path == "." {
+		return data
+	}
+	ap := strings.Split(path, ".")
+	if len(ap) == 0 {
+		return nil
+	}
+	n := []map[string]interface{}{}
+	// created nested map for each key, adding to slice
+	for _, v := range ap {
+		nm := make(map[string]interface{})
+		nm[v] = make(map[string]interface{})
+		n = append(n, nm)
+	}
+	// find the last key (map) and set our data
+	for i, d := range n {
+		for k := range d {
+			z := i + 1
+			if z == len(n) {
+				n[i][k] = data
+				break
+			}
+			n[i][k] = n[z]
+		}
+	}
+
+	return n[0]
+}
+
+// getParents returns a slice of parent charts in reverse order.
+func getParents(c *chart.Chart, out []*chart.Chart) []*chart.Chart {
+	if len(out) == 0 {
+		out = []*chart.Chart{c}
+	}
+	for _, ch := range c.Dependencies {
+		if len(ch.Dependencies) > 0 {
+			out = append(out, ch)
+			out = getParents(ch, out)
+		}
+	}
+
+	return out
+}
+
+// processImportValues merges values from child to parent based on the chart's dependencies' ImportValues field.
+func processImportValues(c *chart.Chart) error {
+	reqs, err := LoadRequirements(c)
+	if err != nil {
+		return err
+	}
+	// combine chart values and empty config to get Values
+	cvals, err := CoalesceValues(c, &chart.Config{})
+	if err != nil {
+		return err
+	}
+	b := make(map[string]interface{}, 0)
+	// import values from each dependency if specified in import-values
+	for _, r := range reqs.Dependencies {
+		// only process raw requirement that is found in chart's dependencies (enabled)
+		found := false
+		name := r.Name
+		for _, v := range c.Dependencies {
+			if v.Metadata.Name == r.Name {
+				found = true
+			}
+			if v.Metadata.Name == r.Alias {
+				found = true
+				name = r.Alias
+			}
+		}
+		if !found {
+			continue
+		}
+		if len(r.ImportValues) > 0 {
+			var outiv []interface{}
+			for _, riv := range r.ImportValues {
+				switch iv := riv.(type) {
+				case map[string]interface{}:
+					nm := map[string]string{
+						"child":  iv["child"].(string),
+						"parent": iv["parent"].(string),
+					}
+					outiv = append(outiv, nm)
+					s := name + "." + nm["child"]
+					// get child table
+					vv, err := cvals.Table(s)
+					if err != nil {
+						log.Printf("Warning: ImportValues missing table: %v", err)
+						continue
+					}
+					// create value map from child to be merged into parent
+					vm := pathToMap(nm["parent"], vv.AsMap())
+					b = coalesceTables(cvals, vm)
+				case string:
+					nm := map[string]string{
+						"child":  "exports." + iv,
+						"parent": ".",
+					}
+					outiv = append(outiv, nm)
+					s := name + "." + nm["child"]
+					vm, err := cvals.Table(s)
+					if err != nil {
+						log.Printf("Warning: ImportValues missing table: %v", err)
+						continue
+					}
+					b = coalesceTables(b, vm.AsMap())
+				}
+			}
+			// set our formatted import values
+			r.ImportValues = outiv
+		}
+	}
+	b = coalesceTables(b, cvals)
+	y, err := yaml.Marshal(b)
+	if err != nil {
+		return err
+	}
+
+	// set the new values
+	c.Values = &chart.Config{Raw: string(y)}
+
+	return nil
+}
+
+// ProcessRequirementsImportValues imports specified chart values from child to parent.
+func ProcessRequirementsImportValues(c *chart.Chart) error {
+	pc := getParents(c, nil)
+	for i := len(pc) - 1; i >= 0; i-- {
+		processImportValues(pc[i])
+	}
 
 	return nil
 }
