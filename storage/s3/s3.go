@@ -3,20 +3,17 @@ package s3
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
-
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/luizbafilho/helm-chart-publisher/storage"
 	"github.com/pkg/errors"
+	"io/ioutil"
 )
 
 type Config struct {
-	AccessKey string
-	SecretKey string
-	Bucket    string
-	Region    string
+	Bucket string
+	Region string
 }
 
 type S3Store struct {

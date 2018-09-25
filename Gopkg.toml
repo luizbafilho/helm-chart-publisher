@@ -1,0 +1,51 @@
+[[constraint]]
+  name = "cloud.google.com/go"
+  version = "v0.28.0"
+
+[[constraint]]
+  name = "github.com/aws/aws-sdk-go"
+  version = "v1.15.39"
+
+[[constraint]]
+  name = "github.com/ghodss/yaml"
+  version = "v1.0.0"
+
+[[constraint]]
+  name = "github.com/labstack/echo"
+  version = "v3.3.6"
+
+[[constraint]]
+  name = "github.com/labstack/gommon"
+  version = "v0.2.7"
+
+[[constraint]]
+  name = "github.com/mitchellh/mapstructure"
+  version = "v1.0.0"
+
+[[constraint]]
+  name = "github.com/ncw/swift"
+  version = "v1.0.41"
+
+[[constraint]]
+  name = "github.com/pkg/errors"
+  version = "v0.8.0"
+
+[[constraint]]
+  name = "github.com/spf13/cobra"
+  version = "v0.0.3"
+
+[[constraint]]
+  name = "github.com/spf13/viper"
+  version = "v1.2.0"
+
+[[constraint]]
+  branch = "master"
+  name = "golang.org/x/net"
+
+[[constraint]]
+  name = "k8s.io/helm"
+  version = "v2.10.0"
+
+[prune]
+  go-tests = true
+  unused-packages = true

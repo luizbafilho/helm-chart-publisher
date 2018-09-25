@@ -1,5 +1,5 @@
 /*
-Copyright 2016 The Kubernetes Authors All rights reserved.
+Copyright The Helm Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,10 +26,10 @@ var (
 	// Increment major number for new feature additions and behavioral changes.
 	// Increment minor number for bug fixes and performance enhancements.
 	// Increment patch number for critical fixes to existing releases.
-	Version = "v2.2.2"
+	Version = "v2.10"
 
 	// BuildMetadata is extra build time data
-	BuildMetadata = ""
+	BuildMetadata = "unreleased"
 	// GitCommit is the git sha1
 	GitCommit = ""
 	// GitTreeState is the state of the git tree

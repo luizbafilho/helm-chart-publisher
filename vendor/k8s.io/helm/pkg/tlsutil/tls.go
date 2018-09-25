@@ -1,5 +1,5 @@
 /*
-Copyright 2016 The Kubernetes Authors All rights reserved.
+Copyright The Helm Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,22 +21,51 @@ import (
 	"crypto/x509"
 	"fmt"
 	"io/ioutil"
+	"k8s.io/helm/pkg/urlutil"
 )
+
+func newTLSConfigCommon(certFile, keyFile, caFile string) (*tls.Config, error) {
+	config := tls.Config{}
+
+	if certFile != "" && keyFile != "" {
+		cert, err := CertFromFilePair(certFile, keyFile)
+		if err != nil {
+			return nil, err
+		}
+		config.Certificates = []tls.Certificate{*cert}
+	}
+
+	if caFile != "" {
+		cp, err := CertPoolFromFile(caFile)
+		if err != nil {
+			return nil, err
+		}
+		config.RootCAs = cp
+	}
+
+	return &config, nil
+}
 
 // NewClientTLS returns tls.Config appropriate for client auth.
 func NewClientTLS(certFile, keyFile, caFile string) (*tls.Config, error) {
-	cert, err := CertFromFilePair(certFile, keyFile)
+	return newTLSConfigCommon(certFile, keyFile, caFile)
+}
+
+// NewTLSConfig returns tls.Config appropriate for client and/or server auth.
+func NewTLSConfig(url, certFile, keyFile, caFile string) (*tls.Config, error) {
+	config, err := newTLSConfigCommon(certFile, keyFile, caFile)
 	if err != nil {
 		return nil, err
 	}
-	cp, err := CertPoolFromFile(caFile)
+	config.BuildNameToCertificate()
+
+	serverName, err := urlutil.ExtractHostname(url)
 	if err != nil {
 		return nil, err
 	}
-	return &tls.Config{
-		Certificates: []tls.Certificate{*cert},
-		RootCAs:      cp,
-	}, nil
+	config.ServerName = serverName
+
+	return config, nil
 }
 
 // CertPoolFromFile returns an x509.CertPool containing the certificates
@@ -62,7 +91,7 @@ func CertPoolFromFile(filename string) (*x509.CertPool, error) {
 func CertFromFilePair(certFile, keyFile string) (*tls.Certificate, error) {
 	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
 	if err != nil {
-		return nil, fmt.Errorf("can't load key pair from cert %s and key %s", certFile, keyFile)
+		return nil, fmt.Errorf("can't load key pair from cert %s and key %s: %s", certFile, keyFile, err)
 	}
 	return &cert, err
 }

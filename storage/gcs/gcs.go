@@ -8,11 +8,11 @@ import (
 	"github.com/luizbafilho/helm-chart-publisher/storage"
 	"github.com/pkg/errors"
 	"io/ioutil"
-
 )
+
 type GcsStore struct {
-	name   string
-	gcs    *gcsStorage.Client
+	name string
+	gcs  *gcsStorage.Client
 }
 
 // Name ...

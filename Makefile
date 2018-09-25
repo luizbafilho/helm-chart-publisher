@@ -17,7 +17,7 @@ build-all: clean
 	$(call gocross,windows,amd64)
 
 test:
-	go test -v -race `glide novendor`
+	go test -v -race
 
 ghr:
 	go get -u github.com/tcnksm/ghr

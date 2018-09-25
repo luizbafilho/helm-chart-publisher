@@ -2,29 +2,10 @@ package config
 
 import (
 	"fmt"
-	"os"
-
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
+	"os"
 )
-
-const APP = "helm-charts-publisher"
-
-func init() {
-	initViper()
-}
-
-func initViper() {
-	// viper.SetConfigName("config")        // name of config file (without extension)
-	// viper.AddConfigPath("/etc/" + APP)   // path to look for the config file in
-	// viper.AddConfigPath("$HOME/." + APP) // call multiple times to add many search paths
-	// viper.AddConfigPath(".")             // optionally look for config in the working directory
-	// err := viper.ReadInConfig()          // Find and read the config file
-	// if err != nil {                      // Handle errors reading the config file
-	// 	fmt.Println("Error:", err)
-	// 	os.Exit(1)
-	// }
-}
 
 type Config map[string]interface{}
 
