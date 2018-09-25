@@ -1,0 +1,51 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ include "helm-chart-publisher.fullname" . }}
+  labels:
+    app: {{ include "helm-chart-publisher.name" . }}
+    chart: {{ include "helm-chart-publisher.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "helm-chart-publisher.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "helm-chart-publisher.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.config }}
+          volumeMounts:
+            - name: pub-config
+              mountPath: /etc/helm-chart-publisher
+            {{ if (.Values.minikube) and (.Values.config.storage.s3) }}
+            #AWS Creds needed when running locally on minikube
+            - name: aws-creds
+              mountPath: /root/.aws
+            {{ end }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+      {{- if .Values.config }}
+      volumes:
+        - name: pub-config
+          configMap:
+            name: {{ .Release.Name }}-publisher-config
+        {{ if (.Values.minikube) and (.Values.config.storage.s3) }}
+        #AWS Creds needed when running locally on minikube
+        - name: aws-creds
+          hostPath:
+            path: /home/docker/.aws
+        {{ end }}
+      {{- end }}
