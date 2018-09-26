@@ -26,35 +26,18 @@ spec:
           volumeMounts:
             - name: pub-config
               mountPath: /etc/helm-chart-publisher
+            - name: aws-creds
+              mountPath: /root/.aws
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
       volumes:
         - name: pub-config
           configMap:
         # Provide the name of the ConfigMap containing the files you want
         # to add to the container
-            name: publisher-config
-          ports:
-            - name: http
-              containerPort: 80
-              protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
-          resources:
-{{ toYaml .Values.resources | indent 12 }}
-    {{- with .Values.nodeSelector }}
-      nodeSelector:
-{{ toYaml . | indent 8 }}
-    {{- end }}
-    {{- with .Values.affinity }}
-      affinity:
-{{ toYaml . | indent 8 }}
-    {{- end }}
-    {{- with .Values.tolerations }}
-      tolerations:
-{{ toYaml . | indent 8 }}
-    {{- end }}
+            name: {{ .Release.Name }}-publisher-config
+        - name: aws-creds
+          hostPath:
+            path: /home/docker/.aws

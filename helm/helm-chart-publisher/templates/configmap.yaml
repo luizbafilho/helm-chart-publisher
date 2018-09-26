@@ -2,18 +2,33 @@ apiVersion: v1
 data:
   config.yaml: |
     repos:
-      - name: hcom
-        bucket: hcom-helm-repository
-
+    {{- range $repo := .Values.config.repos }}
+      - name: {{ $repo.name }}
+        bucket: {{ $repo.bucket }}
+    {{- end }}
+    {{- if .Values.config.storage }}
     storage:
+      {{- if .Values.config.storage.s3 }}
       s3:
-        bucket: hcom-helm-repository
-        region: us-west-2
+        bucket: {{ .Values.config.storage.s3.bucket }}
+        region: {{ .Values.config.storage.s3.region }}
+      {{- end }}
+      {{- if .Values.config.storage.swift }}
+      swift:
+        username: {{ .Values.config.storage.swift.username }}
+        password: {{ .Values.config.storage.swift.password }}
+        tenant: {{ .Values.config.storage.swift.tenant }}
+        authUrl: {{ .Values.config.storage.swift.authUrl }}
+        endpointType: {{ .Values.config.storage.swift.endpointType }}
+        container: "{{ .Values.config.storage.swift.container }}"
+        insecureSkipVerify: {{ .Values.config.storage.swift.insecureSkipVerify }}
+      {{- end }}
+      {{- if .Values.config.storage.gcs }}
+      gcs: {{ .Values.config.storage.gcs }}
+      {{- end }}
+    {{- end }}
+
 kind: ConfigMap
 metadata:
-  creationTimestamp: 2018-09-25T15:49:28Z
-  name: publisher-config
-  namespace: default
-  resourceVersion: "7534"
-  selfLink: /api/v1/namespaces/default/configmaps/publisher-config
-  uid: 96212dbf-c0da-11e8-9f6e-08002743bc8f
+  name: {{ .Release.Name }}-publisher-config
+  namespace: {{ .Release.Namespace }}
