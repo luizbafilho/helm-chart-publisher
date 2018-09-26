@@ -5,9 +5,13 @@
 replicaCount: 1
 
 image:
-  repository: helm-chart-publisher
+  repository: 034324643013.dkr.ecr.us-west-2.amazonaws.com/hotels/helm-chart-publisher
   tag: latest
   pullPolicy: IfNotPresent
+
+ingress:
+  enabled: true
+  host: www.example.com
 
 service:
   type: ClusterIP

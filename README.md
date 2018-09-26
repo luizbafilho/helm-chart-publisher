@@ -74,9 +74,10 @@ To run helm-chart-publisher inside minikube:
 - initialise helm `helm init`
 - mount docker daemon from minikube `eval $(minikube docker-env)`
 - run `make docker` to make the helm-chart-publisher image available to minikube
-- edit values.yaml file to suit your needs
+- edit `values.yaml` file to suit your needs
 - if the storage option selected is AWS, run `minikube mount ~/.aws:/home/docker/.aws` this makes the credentials file available to
 minikube to be mounted into the helm-chart-publisher container
+- edit `templates/deployments.yaml` to mount aws credentials
 - run `helm install --name publisher ./helm-chart-publisher` from the `helm` directory
 - run `kubectl port-forward svc/publisher-helm-chart-publisher 8080:8080` helm-chart-publisher runs on port 8080,
 forward the port to whatever localhost port you want

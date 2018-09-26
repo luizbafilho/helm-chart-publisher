@@ -26,8 +26,9 @@ spec:
           volumeMounts:
             - name: pub-config
               mountPath: /etc/helm-chart-publisher
-            - name: aws-creds
-              mountPath: /root/.aws
+            #AWS Creds needed when running locally on minikube
+            #- name: aws-creds
+            # mountPath: /root/.aws
           ports:
             - name: http
               containerPort: 8080
@@ -35,9 +36,8 @@ spec:
       volumes:
         - name: pub-config
           configMap:
-        # Provide the name of the ConfigMap containing the files you want
-        # to add to the container
             name: {{ .Release.Name }}-publisher-config
-        - name: aws-creds
-          hostPath:
-            path: /home/docker/.aws
+        #AWS Creds needed when running locally on minikube
+        #- name: aws-creds
+        #  hostPath:
+        #    path: /home/docker/.aws
