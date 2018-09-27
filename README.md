@@ -78,7 +78,7 @@ To run helm-chart-publisher inside minikube:
 - if the storage option selected is AWS, run `minikube mount ~/.aws:/home/docker/.aws` this makes the credentials file available to
 minikube to be mounted into the helm-chart-publisher container
 - make sure that `.Values.minikube` is true in the values
-  - This will mount your aws
+  - This will mount your aws credentials from your minikube host into your pod and subsequently, your container
 - run `helm install --name publisher ./helm-chart-publisher` from the `helm` directory
 - run `kubectl port-forward svc/publisher-helm-chart-publisher 8080:8080` helm-chart-publisher runs on port 8080,
 forward the port to whatever localhost port you want
