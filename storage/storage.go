@@ -21,7 +21,7 @@ type Storage interface {
 	Put(bucket string, path string, content []byte) (*PutResponse, error)
 	Get(bucket string, path string) (*GetResponse, error)
 
-	GetURL(bucket string, directory string) string
+	GetURL(bucket string, directory string, url string) string
 }
 
 // PathNotFoundErr is returned when operating on a nonexistent path.

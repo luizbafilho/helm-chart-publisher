@@ -10,6 +10,8 @@ The Helm repository isolation can be done via bucket or a directory. The publish
 
 Each repo requires `name` and `bucket`. You can also specify a `directory`, if you do so, the charts are going to be stored in `bucket` under the specified path.
 
+Finally, you can also specify a `url` in the case you are using a proxy, CDN, etc. to direct traffic to your bucket. This also allows you the ability to add basic authentication in front of your repository in the form of `https://[username]:[password]@[domain]`. You can also specify subdirectories in the path if you so choose. The final output with a specified `url` will be `[url]/[chart|index]`.
+
 These are the configuration options for the helm publisher.
 
 ```
@@ -21,6 +23,7 @@ repos:
   - name: test
     bucket: test-bucket
     directory: test
+    url: https://[username]:[password]@mycharts.com/test
 
 storage:
   gcs: {} # uses GCloud Application Default Credentials
