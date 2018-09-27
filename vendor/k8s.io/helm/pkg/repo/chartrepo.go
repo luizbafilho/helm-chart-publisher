@@ -1,5 +1,5 @@
 /*
-Copyright 2016 The Kubernetes Authors All rights reserved.
+Copyright The Helm Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ package repo // import "k8s.io/helm/pkg/repo"
 import (
 	"fmt"
 	"io/ioutil"
-	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -27,9 +27,8 @@ import (
 	"github.com/ghodss/yaml"
 
 	"k8s.io/helm/pkg/chartutil"
+	"k8s.io/helm/pkg/getter"
 	"k8s.io/helm/pkg/provenance"
-	"k8s.io/helm/pkg/tlsutil"
-	"k8s.io/helm/pkg/urlutil"
 )
 
 // Entry represents a collection of parameters for chart repository
@@ -37,6 +36,8 @@ type Entry struct {
 	Name     string `json:"name"`
 	Cache    string `json:"cache"`
 	URL      string `json:"url"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 	CertFile string `json:"certFile"`
 	KeyFile  string `json:"keyFile"`
 	CAFile   string `json:"caFile"`
@@ -47,37 +48,23 @@ type ChartRepository struct {
 	Config     *Entry
 	ChartPaths []string
 	IndexFile  *IndexFile
-	Client     *http.Client
-}
-
-// Getter is an interface to support GET to the specified URL.
-type Getter interface {
-	Get(url string) (*http.Response, error)
+	Client     getter.Getter
 }
 
 // NewChartRepository constructs ChartRepository
-func NewChartRepository(cfg *Entry) (*ChartRepository, error) {
-	var client *http.Client
-	if cfg.CertFile != "" && cfg.KeyFile != "" && cfg.CAFile != "" {
-		tlsConf, err := tlsutil.NewClientTLS(cfg.CertFile, cfg.KeyFile, cfg.CAFile)
-		if err != nil {
-			return nil, fmt.Errorf("can't create TLS config for client: %s", err.Error())
-		}
-		tlsConf.BuildNameToCertificate()
+func NewChartRepository(cfg *Entry, getters getter.Providers) (*ChartRepository, error) {
+	u, err := url.Parse(cfg.URL)
+	if err != nil {
+		return nil, fmt.Errorf("invalid chart URL format: %s", cfg.URL)
+	}
 
-		sni, err := urlutil.ExtractHostname(cfg.URL)
-		if err != nil {
-			return nil, err
-		}
-		tlsConf.ServerName = sni
-
-		client = &http.Client{
-			Transport: &http.Transport{
-				TLSClientConfig: tlsConf,
-			},
-		}
-	} else {
-		client = http.DefaultClient
+	getterConstructor, err := getters.ByScheme(u.Scheme)
+	if err != nil {
+		return nil, fmt.Errorf("Could not find protocol handler for: %s", u.Scheme)
+	}
+	client, err := getterConstructor(cfg.URL, cfg.CertFile, cfg.KeyFile, cfg.CAFile)
+	if err != nil {
+		return nil, fmt.Errorf("Could not construct protocol handler for: %s error: %v", u.Scheme, err)
 	}
 
 	return &ChartRepository{
@@ -85,15 +72,6 @@ func NewChartRepository(cfg *Entry) (*ChartRepository, error) {
 		IndexFile: NewIndexFile(),
 		Client:    client,
 	}, nil
-}
-
-// Get issues a GET using configured client to the specified URL.
-func (r *ChartRepository) Get(url string) (*http.Response, error) {
-	resp, err := r.Client.Get(url)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
 }
 
 // Load loads a directory of charts as if it were a repository.
@@ -134,15 +112,21 @@ func (r *ChartRepository) Load() error {
 // is for pre-2.2.0 repo files.
 func (r *ChartRepository) DownloadIndexFile(cachePath string) error {
 	var indexURL string
-
-	indexURL = strings.TrimSuffix(r.Config.URL, "/") + "/index.yaml"
-	resp, err := r.Get(indexURL)
+	parsedURL, err := url.Parse(r.Config.URL)
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	parsedURL.Path = strings.TrimSuffix(parsedURL.Path, "/") + "/index.yaml"
 
-	index, err := ioutil.ReadAll(resp.Body)
+	indexURL = parsedURL.String()
+
+	r.setCredentials()
+	resp, err := r.Client.Get(indexURL)
+	if err != nil {
+		return err
+	}
+
+	index, err := ioutil.ReadAll(resp)
 	if err != nil {
 		return err
 	}
@@ -161,9 +145,15 @@ func (r *ChartRepository) DownloadIndexFile(cachePath string) error {
 	if !filepath.IsAbs(cp) {
 		cp = filepath.Join(cachePath, cp)
 	}
-	println("Writing to", cp)
 
 	return ioutil.WriteFile(cp, index, 0644)
+}
+
+// If HttpGetter is used, this method sets the configured repository credentials on the HttpGetter.
+func (r *ChartRepository) setCredentials() {
+	if t, ok := r.Client.(*getter.HttpGetter); ok {
+		t.SetCredentials(r.Config.Username, r.Config.Password)
+	}
 }
 
 // Index generates an index for the chart repository and writes an index.yaml file.
@@ -202,4 +192,91 @@ func (r *ChartRepository) generateIndex() error {
 	}
 	r.IndexFile.SortEntries()
 	return nil
+}
+
+// FindChartInRepoURL finds chart in chart repository pointed by repoURL
+// without adding repo to repositories
+func FindChartInRepoURL(repoURL, chartName, chartVersion, certFile, keyFile, caFile string, getters getter.Providers) (string, error) {
+	return FindChartInAuthRepoURL(repoURL, "", "", chartName, chartVersion, certFile, keyFile, caFile, getters)
+}
+
+// FindChartInAuthRepoURL finds chart in chart repository pointed by repoURL
+// without adding repo to repositories, like FindChartInRepoURL,
+// but it also receives credentials for the chart repository.
+func FindChartInAuthRepoURL(repoURL, username, password, chartName, chartVersion, certFile, keyFile, caFile string, getters getter.Providers) (string, error) {
+
+	// Download and write the index file to a temporary location
+	tempIndexFile, err := ioutil.TempFile("", "tmp-repo-file")
+	if err != nil {
+		return "", fmt.Errorf("cannot write index file for repository requested")
+	}
+	defer os.Remove(tempIndexFile.Name())
+
+	c := Entry{
+		URL:      repoURL,
+		Username: username,
+		Password: password,
+		CertFile: certFile,
+		KeyFile:  keyFile,
+		CAFile:   caFile,
+	}
+	r, err := NewChartRepository(&c, getters)
+	if err != nil {
+		return "", err
+	}
+	if err := r.DownloadIndexFile(tempIndexFile.Name()); err != nil {
+		return "", fmt.Errorf("Looks like %q is not a valid chart repository or cannot be reached: %s", repoURL, err)
+	}
+
+	// Read the index file for the repository to get chart information and return chart URL
+	repoIndex, err := LoadIndexFile(tempIndexFile.Name())
+	if err != nil {
+		return "", err
+	}
+
+	errMsg := fmt.Sprintf("chart %q", chartName)
+	if chartVersion != "" {
+		errMsg = fmt.Sprintf("%s version %q", errMsg, chartVersion)
+	}
+	cv, err := repoIndex.Get(chartName, chartVersion)
+	if err != nil {
+		return "", fmt.Errorf("%s not found in %s repository", errMsg, repoURL)
+	}
+
+	if len(cv.URLs) == 0 {
+		return "", fmt.Errorf("%s has no downloadable URLs", errMsg)
+	}
+
+	chartURL := cv.URLs[0]
+
+	absoluteChartURL, err := ResolveReferenceURL(repoURL, chartURL)
+	if err != nil {
+		return "", fmt.Errorf("failed to make chart URL absolute: %v", err)
+	}
+
+	return absoluteChartURL, nil
+}
+
+// ResolveReferenceURL resolves refURL relative to baseURL.
+// If refURL is absolute, it simply returns refURL.
+func ResolveReferenceURL(baseURL, refURL string) (string, error) {
+	parsedBaseURL, err := url.Parse(baseURL)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse %s as URL: %v", baseURL, err)
+	}
+
+	parsedRefURL, err := url.Parse(refURL)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse %s as URL: %v", refURL, err)
+	}
+
+	// if the base URL contains query string parameters,
+	// propagate them to the child URL but only if the
+	// refURL is relative to baseURL
+	resolvedURL := parsedBaseURL.ResolveReference(parsedRefURL)
+	if (resolvedURL.Hostname() == parsedBaseURL.Hostname()) && (resolvedURL.Port() == parsedBaseURL.Port()) {
+		resolvedURL.RawQuery = parsedBaseURL.RawQuery
+	}
+
+	return resolvedURL.String(), nil
 }

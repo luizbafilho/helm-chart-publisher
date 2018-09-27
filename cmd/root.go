@@ -16,13 +16,12 @@ package cmd
 
 import (
 	"fmt"
-	"log"
-	"os"
-
 	"github.com/luizbafilho/helm-chart-publisher/api"
 	"github.com/luizbafilho/helm-chart-publisher/config"
 	"github.com/luizbafilho/helm-chart-publisher/publisher"
 	"github.com/spf13/cobra"
+	"log"
+	"os"
 )
 
 var (
@@ -55,6 +54,10 @@ var RootCmd = &cobra.Command{
 	},
 }
 
+func init() {
+	RootCmd.PersistentFlags().StringVarP(&configFile, "config", "c", "", "config file")
+}
+
 // Execute adds all child commands to the root command sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
@@ -62,8 +65,4 @@ func Execute() {
 		fmt.Println(err)
 		os.Exit(-1)
 	}
-}
-
-func init() {
-	RootCmd.PersistentFlags().StringVarP(&configFile, "config", "c", "", "config file")
 }

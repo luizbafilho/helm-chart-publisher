@@ -1,5 +1,5 @@
 /*
-Copyright 2016 The Kubernetes Authors All rights reserved.
+Copyright The Helm Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/ghodss/yaml"
 
@@ -70,6 +71,12 @@ func SaveDir(c *chart.Chart, dest string) error {
 	// Save files
 	for _, f := range c.Files {
 		n := filepath.Join(outdir, f.TypeUrl)
+
+		d := filepath.Dir(n)
+		if err := os.MkdirAll(d, 0755); err != nil {
+			return err
+		}
+
 		if err := ioutil.WriteFile(n, f.Value, 0755); err != nil {
 			return err
 		}
@@ -115,6 +122,14 @@ func Save(c *chart.Chart, outDir string) (string, error) {
 
 	filename := fmt.Sprintf("%s-%s.tgz", cfile.Name, cfile.Version)
 	filename = filepath.Join(outDir, filename)
+	if stat, err := os.Stat(filepath.Dir(filename)); os.IsNotExist(err) {
+		if err := os.MkdirAll(filepath.Dir(filename), 0755); !os.IsExist(err) {
+			return "", err
+		}
+	} else if !stat.IsDir() {
+		return "", fmt.Errorf("is not a directory: %s", filepath.Dir(filename))
+	}
+
 	f, err := os.Create(filename)
 	if err != nil {
 		return "", err
@@ -191,9 +206,10 @@ func writeTarContents(out *tar.Writer, c *chart.Chart, prefix string) error {
 func writeToTar(out *tar.Writer, name string, body []byte) error {
 	// TODO: Do we need to create dummy parent directory names if none exist?
 	h := &tar.Header{
-		Name: name,
-		Mode: 0755,
-		Size: int64(len(body)),
+		Name:    filepath.ToSlash(name),
+		Mode:    0755,
+		Size:    int64(len(body)),
+		ModTime: time.Now(),
 	}
 	if err := out.WriteHeader(h); err != nil {
 		return err

@@ -2,7 +2,6 @@ package publisher
 
 import (
 	"errors"
-
 	"github.com/mitchellh/mapstructure"
 )
 
