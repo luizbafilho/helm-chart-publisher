@@ -1,0 +1,40 @@
+# Default values for helm-chart-publisher.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+minikube: false
+
+replicaCount: 1
+
+image:
+  repository: helm-chart-publisher
+  tag: latest
+  pullPolicy: IfNotPresent
+
+ingress:
+  enabled: true
+  host: www.helm-publisher.com
+
+service:
+  type: ClusterIP
+  port: 8080
+
+## REQUIRED
+# config:
+   # repos:
+     # - name: repo-name
+       # bucket: bucket-name
+  # storage:
+    # s3:
+      # bucket: bucket-name
+      # region: us-west-2
+    # swift:
+    #   username: SWIFT_USERNAME
+    #   password: SWIFT_USERNAME
+    #   tenant: some_tenant
+    #   authUrl: https://some-auth-url:5000/v2.0
+    #   endpointType: admin
+    #   container: "kube-charts"
+    #   insecureSkipVerify: false
+    #
+    # gcs: "{}"
