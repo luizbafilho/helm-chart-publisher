@@ -23,21 +23,29 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.config }}
           volumeMounts:
             - name: pub-config
               mountPath: /etc/helm-chart-publisher
+            {{ if (.Values.minikube) and (.Values.config.storage.s3) }}
             #AWS Creds needed when running locally on minikube
-            #- name: aws-creds
-            # mountPath: /root/.aws
+            - name: aws-creds
+              mountPath: /root/.aws
+            {{ end }}
+          {{- end }}
           ports:
             - name: http
               containerPort: 8080
               protocol: TCP
+      {{- if .Values.config }}
       volumes:
         - name: pub-config
           configMap:
             name: {{ .Release.Name }}-publisher-config
+        {{ if (.Values.minikube) and (.Values.config.storage.s3) }}
         #AWS Creds needed when running locally on minikube
-        #- name: aws-creds
-        #  hostPath:
-        #    path: /home/docker/.aws
+        - name: aws-creds
+          hostPath:
+            path: /home/docker/.aws
+        {{ end }}
+      {{- end }}

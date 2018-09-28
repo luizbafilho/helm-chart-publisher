@@ -2,29 +2,32 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+minikube: false
+
 replicaCount: 1
 
 image:
-  repository: 034324643013.dkr.ecr.us-west-2.amazonaws.com/hotels/helm-chart-publisher
-  tag: 1.0.0
+  repository: helm-chart-publisher
+  tag: latest
   pullPolicy: IfNotPresent
 
 ingress:
   enabled: true
-  host: www.example.com
+  host: www.helm-publisher.com
 
 service:
   type: ClusterIP
   port: 8080
 
-config:
-  repos:
-    - name: hcom
-      bucket: hcom-helm-repository
-  storage:
-    s3:
-      bucket: hcom-helm-repository
-      region: us-west-2
+## REQUIRED
+# config:
+   # repos:
+     # - name: repo-name
+       # bucket: bucket-name
+  # storage:
+    # s3:
+      # bucket: bucket-name
+      # region: us-west-2
     # swift:
     #   username: SWIFT_USERNAME
     #   password: SWIFT_USERNAME
@@ -33,4 +36,5 @@ config:
     #   endpointType: admin
     #   container: "kube-charts"
     #   insecureSkipVerify: false
+    #
     # gcs: "{}"

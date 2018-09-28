@@ -1,10 +1,13 @@
+{{- if .Values.config }}
 apiVersion: v1
 data:
   config.yaml: |
+    {{- if .Values.config.repos }}
     repos:
     {{- range $repo := .Values.config.repos }}
       - name: {{ $repo.name }}
         bucket: {{ $repo.bucket }}
+    {{- end }}
     {{- end }}
     {{- if .Values.config.storage }}
     storage:
@@ -20,7 +23,7 @@ data:
         tenant: {{ .Values.config.storage.swift.tenant }}
         authUrl: {{ .Values.config.storage.swift.authUrl }}
         endpointType: {{ .Values.config.storage.swift.endpointType }}
-        container: "{{ .Values.config.storage.swift.container }}"
+        container: {{ .Values.config.storage.swift.container }}
         insecureSkipVerify: {{ .Values.config.storage.swift.insecureSkipVerify }}
       {{- end }}
       {{- if .Values.config.storage.gcs }}
@@ -32,3 +35,4 @@ kind: ConfigMap
 metadata:
   name: {{ .Release.Name }}-publisher-config
   namespace: {{ .Release.Namespace }}
+{{- end }}
