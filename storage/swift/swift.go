@@ -87,6 +87,11 @@ func (s *SwiftStore) Put(bucket string, path string, content []byte) (*storage.P
 }
 
 // GetURL ...
-func (s *SwiftStore) GetURL(bucket string, path string) string {
-	return fmt.Sprintf("%s/%s/%s", s.swift.Auth.StorageUrl(true), bucket, path)
+func (s *SwiftStore) GetURL(bucket string, path string, url string) string {
+	if url != "" {
+		return fmt.Sprintf(url)
+	} else {
+		return fmt.Sprintf("%s/%s/%s", s.swift.Auth.StorageUrl(true), bucket, path)
+	}
 }
+

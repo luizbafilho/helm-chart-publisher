@@ -154,7 +154,7 @@ func (p *Publisher) createNewIndex(r *Repo, filename string, chartContent []byte
 	if err != nil {
 		return nil, HelmErr{err, "Digest helm chart failed"}
 	}
-	index.Add(chart.Metadata, filename, p.store.GetURL(r.Bucket, r.Directory), hash)
+	index.Add(chart.Metadata, filename, p.store.GetURL(r.Bucket, r.Directory, r.Url), hash)
 
 	return index, nil
 }
