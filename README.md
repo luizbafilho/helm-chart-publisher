@@ -71,6 +71,7 @@ docker run -p 8080:8080 -v /Users/$(whoami)/config:/etc/helm-chart-publisher/ -v
 - The config YAML must be mounted into the /etc/helm-chart-publisher directory
 - .aws configuration should also be mounted in to prevent restarting container when credentials expire
 
+
 ### Inside minikube
 To run helm-chart-publisher inside minikube:
 - start minikube `minikube start`
@@ -134,11 +135,6 @@ entries:
 generated: 2017-03-07T17:34:47.965508312-03:00
 
 ```
-
-
-
-
-
 
 
 ## Roadmap
