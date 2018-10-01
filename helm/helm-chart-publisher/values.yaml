@@ -19,6 +19,11 @@ service:
   type: ClusterIP
   port: 8080
 
+## OPTIONAL (for use with annotations)
+#deployment:
+  #annotations:
+    # key: "value"
+
 ## REQUIRED
 # config:
    # repos:
