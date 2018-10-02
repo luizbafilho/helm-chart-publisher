@@ -15,6 +15,12 @@ spec:
       release: {{ .Release.Name }}
   template:
     metadata:
+      {{- if .Values.deployment.annotations }}
+      annotations:
+        {{- range $key, $val := .Values.deployment.annotations }}
+        {{ $key }}: {{ $val }}
+        {{- end }}
+      {{- end }}
       labels:
         app: {{ include "helm-chart-publisher.name" . }}
         release: {{ .Release.Name }}
