@@ -43,7 +43,7 @@ func parseError(err error) error {
 }
 
 // Create a new aws session for new requests
-func newSession(region string) *s3.S3  {
+func newS3Session(region string) *s3.S3  {
 	sess := session.Must(session.NewSession(&aws.Config{
 		Region: aws.String(region),
 	}))
@@ -52,7 +52,7 @@ func newSession(region string) *s3.S3  {
 
 // Get ...
 func (s *S3Store) Get(bucket string, path string) (*storage.GetResponse, error) {
-	s.s3 = newSession(s.config.Region)
+	s.s3 = newS3Session(s.config.Region)
 	params := &s3.GetObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(path),
@@ -75,7 +75,7 @@ func (s *S3Store) Get(bucket string, path string) (*storage.GetResponse, error) 
 
 // Put stores the content
 func (s *S3Store) Put(bucket string, path string, content []byte) (*storage.PutResponse, error) {
-	s.s3 = newSession(s.config.Region)
+	s.s3 = newS3Session(s.config.Region)
 	params := &s3.PutObjectInput{
 		Bucket:      aws.String(bucket),
 		Key:         aws.String(path),
