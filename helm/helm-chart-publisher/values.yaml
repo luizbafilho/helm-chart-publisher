@@ -19,20 +19,21 @@ service:
   type: ClusterIP
   port: 8080
 
-## OPTIONAL (for use with annotations)
-#deployment:
-  #annotations:
+    ## OPTIONAL (for use with annotations)
+    #deployment:
+    #annotations:
     # key: "value"
 
-## REQUIRED
-# config:
-   # repos:
-     # - name: repo-name
-       # bucket: bucket-name
-  # storage:
+    ## REQUIRED
+    # config:
+    # repos:
+    # - name: repo-name
+    # bucket: bucket-name
+    # storage:
     # s3:
-      # bucket: bucket-name
-      # region: us-west-2
+    # bucket: bucket-name
+    # region: us-west-2
+    # protocol: s3 # OPTIONAL
     # swift:
     #   username: SWIFT_USERNAME
     #   password: SWIFT_USERNAME
@@ -42,4 +43,4 @@ service:
     #   container: "kube-charts"
     #   insecureSkipVerify: false
     #
-    # gcs: "{}"
+  # gcs: "{}"

@@ -15,6 +15,9 @@ data:
       s3:
         bucket: {{ .Values.config.storage.s3.bucket }}
         region: {{ .Values.config.storage.s3.region }}
+        {{- if .Values.config.storage.s3.protocol }}
+        protocol: {{ .Values.config.storage.s3.protocol }}
+        {{- end }}
       {{- end }}
       {{- if .Values.config.storage.swift }}
       swift:
