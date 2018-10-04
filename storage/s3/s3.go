@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
+	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/luizbafilho/helm-chart-publisher/storage"
 	"github.com/pkg/errors"
@@ -12,8 +13,9 @@ import (
 )
 
 type Config struct {
-	Bucket string
-	Region string
+	Bucket   string
+	Region   string
+	Protocol string
 }
 
 type S3Store struct {
@@ -40,8 +42,17 @@ func parseError(err error) error {
 	return err
 }
 
+// Create a new aws session for new requests
+func newS3Session(region string) *s3.S3  {
+	sess := session.Must(session.NewSession(&aws.Config{
+		Region: aws.String(region),
+	}))
+	return s3.New(sess)
+}
+
 // Get ...
 func (s *S3Store) Get(bucket string, path string) (*storage.GetResponse, error) {
+	s.s3 = newS3Session(s.config.Region)
 	params := &s3.GetObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(path),
@@ -64,6 +75,7 @@ func (s *S3Store) Get(bucket string, path string) (*storage.GetResponse, error) 
 
 // Put stores the content
 func (s *S3Store) Put(bucket string, path string, content []byte) (*storage.PutResponse, error) {
+	s.s3 = newS3Session(s.config.Region)
 	params := &s3.PutObjectInput{
 		Bucket:      aws.String(bucket),
 		Key:         aws.String(path),
@@ -84,11 +96,22 @@ func (s *S3Store) Put(bucket string, path string, content []byte) (*storage.PutR
 func (s *S3Store) GetURL(bucket string, path string, url string) string {
 	if url != "" {
 		return fmt.Sprintf(url)
-	} else {
-		domain := fmt.Sprintf("s3-%s.amazonaws.com", s.config.Region)
-		if s.config.Region == "us-east-1" {
-			domain = "s3.amazonaws.com"
-		}
-		return fmt.Sprintf("https://%s/%s/%s", domain, bucket, path)
+
+	} else if s.config.Protocol == "s3" {
+		return s.getS3URL(bucket, path)
 	}
+
+	return s.getHttpsURL(bucket, path)
+}
+
+func (s *S3Store) getHttpsURL(bucket, path string) string {
+	domain := fmt.Sprintf("s3-%s.amazonaws.com", s.config.Region)
+	if s.config.Region == "us-east-1" {
+		domain = "s3.amazonaws.com"
+	}
+	return fmt.Sprintf("https://%s/%s/%s", domain, bucket, path)
+}
+
+func (s *S3Store) getS3URL(bucket, path string) string {
+	return fmt.Sprintf("s3://%s/%s", bucket, path)
 }

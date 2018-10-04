@@ -33,6 +33,7 @@ service:
     # s3:
       # bucket: bucket-name
       # region: us-west-2
+      # protocol: s3 # OPTIONAL
     # swift:
     #   username: SWIFT_USERNAME
     #   password: SWIFT_USERNAME
