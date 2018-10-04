@@ -30,6 +30,7 @@ storage:
   s3:
     bucket: charts-bucket-incubator
     region: us-west-2
+    protocol: s3 # specify if you want to use the s3 protocol, defaults to http if not specified
   swift:
     username: SWIFT_USERNAME
     password: SWIFT_USERNAME
