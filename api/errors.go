@@ -3,8 +3,8 @@ package api
 import (
 	"net/http"
 
+	"github.com/HotelsDotCom/helm-chart-publisher/publisher"
 	"github.com/labstack/echo"
-	"github.com/luizbafilho/helm-chart-publisher/publisher"
 )
 
 type BadRequestErr string

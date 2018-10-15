@@ -1,10 +1,10 @@
 package api
 
 import (
+	"github.com/HotelsDotCom/helm-chart-publisher/publisher"
 	"github.com/ghodss/yaml"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
-	"github.com/luizbafilho/helm-chart-publisher/publisher"
 	"net/http"
 )
 
