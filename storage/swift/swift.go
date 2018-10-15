@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/luizbafilho/helm-chart-publisher/storage"
+	"github.com/HotelsDotCom/helm-chart-publisher/storage"
 	"github.com/ncw/swift"
 	"github.com/pkg/errors"
 )
@@ -94,4 +94,3 @@ func (s *SwiftStore) GetURL(bucket string, path string, url string) string {
 		return fmt.Sprintf("%s/%s/%s", s.swift.Auth.StorageUrl(true), bucket, path)
 	}
 }
-

@@ -16,9 +16,9 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/luizbafilho/helm-chart-publisher/api"
-	"github.com/luizbafilho/helm-chart-publisher/config"
-	"github.com/luizbafilho/helm-chart-publisher/publisher"
+	"github.com/HotelsDotCom/helm-chart-publisher/api"
+	"github.com/HotelsDotCom/helm-chart-publisher/config"
+	"github.com/HotelsDotCom/helm-chart-publisher/publisher"
 	"github.com/spf13/cobra"
 	"log"
 	"os"

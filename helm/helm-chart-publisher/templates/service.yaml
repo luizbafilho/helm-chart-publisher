@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "helm-chart-publisher.fullname" . }}
+  labels:
+    app: {{ include "helm-chart-publisher.name" . }}
+    chart: {{ include "helm-chart-publisher.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ include "helm-chart-publisher.name" . }}
+    release: {{ .Release.Name }}

@@ -30,6 +30,7 @@ storage:
   s3:
     bucket: charts-bucket-incubator
     region: us-west-2
+    protocol: s3 # specify if you want to use the s3 protocol, defaults to http if not specified
   swift:
     username: SWIFT_USERNAME
     password: SWIFT_USERNAME
@@ -46,9 +47,9 @@ You can either:
 - Run as a Docker container
 
 ### Binary
-Get the latest `helm-chart-publisher` for your platform on the [releases](https://github.com/luizbafilho/helm-chart-publisher/releases) page
+Get the latest `helm-chart-publisher` for your platform on the [releases](https://github.com/HotelsDotCom/helm-chart-publisher/releases) page
 ```
-curl -o /usr/local/bin/helm-chart-publisher -sSL https://github.com/luizbafilho/helm-chart-publisher/releases/download/<version>/helm-chart-publisher_<os>-<arch>
+curl -o /usr/local/bin/helm-chart-publisher -sSL https://github.com/HotelsDotCom/helm-chart-publisher/releases/download/<version>/helm-chart-publisher_<os>-<arch>
 chmod +x /usr/local/bin/helm-chart-publisher
 ```
 
@@ -71,6 +72,22 @@ docker run -p 8080:8080 -v /Users/$(whoami)/config:/etc/helm-chart-publisher/ -v
 - The config YAML must be mounted into the /etc/helm-chart-publisher directory
 - .aws configuration should also be mounted in to prevent restarting container when credentials expire
 
+
+### Inside minikube
+To run helm-chart-publisher inside minikube:
+- start minikube `minikube start`
+- initialise helm `helm init`
+- mount docker daemon from minikube `eval $(minikube docker-env)`
+- run `make docker` to make the helm-chart-publisher image available to minikube
+- edit `values.yaml` file to suit your needs
+- if the storage option selected is AWS, run `minikube mount ~/.aws:/home/docker/.aws` this makes the credentials file available to
+minikube to be mounted into the helm-chart-publisher container
+- make sure that `.Values.minikube` is true in the values
+  - This will mount your aws credentials from your minikube host into your pod and subsequently, your container
+- run `helm install --name publisher ./helm-chart-publisher` from the `helm` directory
+- run `kubectl port-forward svc/publisher-helm-chart-publisher 8080:8080` helm-chart-publisher runs on port 8080,
+forward the port to whatever localhost port you want
+- test it is up and running using `curl http://localhost:8080/health`
 
 
 ## Usage 
@@ -119,9 +136,6 @@ entries:
 generated: 2017-03-07T17:34:47.965508312-03:00
 
 ```
-
-
-
 
 
 ## Roadmap
