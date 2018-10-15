@@ -3,11 +3,11 @@ package s3
 import (
 	"bytes"
 	"fmt"
+	"github.com/HotelsDotCom/helm-chart-publisher/storage"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/luizbafilho/helm-chart-publisher/storage"
 	"github.com/pkg/errors"
 	"io/ioutil"
 )
@@ -43,7 +43,7 @@ func parseError(err error) error {
 }
 
 // Create a new aws session for new requests
-func newS3Session(region string) *s3.S3  {
+func newS3Session(region string) *s3.S3 {
 	sess := session.Must(session.NewSession(&aws.Config{
 		Region: aws.String(region),
 	}))

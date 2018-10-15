@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/luizbafilho/helm-chart-publisher/storage"
+	"github.com/HotelsDotCom/helm-chart-publisher/storage"
 	"github.com/mitchellh/mapstructure"
 	"github.com/ncw/swift"
 )

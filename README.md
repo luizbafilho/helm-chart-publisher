@@ -47,9 +47,9 @@ You can either:
 - Run as a Docker container
 
 ### Binary
-Get the latest `helm-chart-publisher` for your platform on the [releases](https://github.com/luizbafilho/helm-chart-publisher/releases) page
+Get the latest `helm-chart-publisher` for your platform on the [releases](https://github.com/HotelsDotCom/helm-chart-publisher/releases) page
 ```
-curl -o /usr/local/bin/helm-chart-publisher -sSL https://github.com/luizbafilho/helm-chart-publisher/releases/download/<version>/helm-chart-publisher_<os>-<arch>
+curl -o /usr/local/bin/helm-chart-publisher -sSL https://github.com/HotelsDotCom/helm-chart-publisher/releases/download/<version>/helm-chart-publisher_<os>-<arch>
 chmod +x /usr/local/bin/helm-chart-publisher
 ```
 

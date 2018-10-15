@@ -2,7 +2,7 @@ package gcs
 
 import (
 	gcsStorage "cloud.google.com/go/storage"
-	"github.com/luizbafilho/helm-chart-publisher/storage"
+	"github.com/HotelsDotCom/helm-chart-publisher/storage"
 	"github.com/pkg/errors"
 	"golang.org/x/net/context"
 )

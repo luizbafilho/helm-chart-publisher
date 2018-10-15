@@ -9,9 +9,9 @@ import (
 
 	yaml "github.com/ghodss/yaml"
 
-	"github.com/luizbafilho/helm-chart-publisher/config"
-	"github.com/luizbafilho/helm-chart-publisher/storage"
-	_ "github.com/luizbafilho/helm-chart-publisher/storage/s3"
+	"github.com/HotelsDotCom/helm-chart-publisher/config"
+	"github.com/HotelsDotCom/helm-chart-publisher/storage"
+	_ "github.com/HotelsDotCom/helm-chart-publisher/storage/s3"
 	"github.com/pkg/errors"
 	"k8s.io/helm/pkg/chartutil"
 	"k8s.io/helm/pkg/provenance"

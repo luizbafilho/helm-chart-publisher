@@ -5,7 +5,7 @@ import (
 
 	gcsStorage "cloud.google.com/go/storage"
 	"context"
-	"github.com/luizbafilho/helm-chart-publisher/storage"
+	"github.com/HotelsDotCom/helm-chart-publisher/storage"
 	"github.com/pkg/errors"
 	"io/ioutil"
 )
